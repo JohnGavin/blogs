@@ -1,0 +1,7 @@
+^LICENSE\.md$
+^result.*$
+^.Rproj.user/$
+^.RHistory$
+^.RData$
+^.DS_Store$
+#.quarto

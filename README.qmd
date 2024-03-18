@@ -1,0 +1,402 @@
+---
+# Quarto Publish publish.yml
+# quarto::quarto_render("README.qmd", output_format = "all")
+# quarto render README.qmd --to html,gfm
+# quarto typst compile README.typ
+# https://quarto.org/docs/publishing/github-pages.html#github-action
+# quarto publish gh-pages README.qmd --no-prompt # --to index.html 
+# https://r-pkgs.org/other-markdown.html#sec-readme
+# https://quarto.org/docs/computations/parameters.html#knitr
+params:
+  alpha: 0.1
+  ratio: 0.1
+title: pipeline for robotweath.com post param alpha "`r params$alpha`"
+description: targets, webR and dashboard 
+format:
+  dashboard:
+    # theme: darkly
+    orientation: rows
+    # theme: default
+    # expandable: true
+    # scrolling: false
+    nav-buttons:
+     # - reddit
+     - icon: gitlab
+       href: https://gitlab.com/johngavin/robotweath.com
+  # # https://quarto.org/docs/output-formats/typst.html#overview
+  # # ~/Documents_/note_taking_atom/projects/rix/quarto_typst.md
+  # Typst creates PDF output
+  typst:
+    keep-typ: true
+    toc-title: Contnts
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    # section-numbering: 1.1.a
+    columns: 2
+  html:
+    theme: darkly
+  # https://quarto.org/docs/computations/r.html#data-frames
+  # https://quarto.org/docs/computations/r.html#output-formats
+    # paging for row/col overflow
+    # pages => add navbar in dashboard 
+    # df-print: paged
+    toc: true
+    code-fold: true
+    code-summary: "Show code"
+    fontsize: "15pt"
+    # section-numbering: 1.1.a
+    number-sections: true
+    css: styles.css
+output: github_document # /html_document # NB: OLD Rmarkdown
+filters:
+  # https://r-posts.com/add-shiny-in-quarto-blog-with-shinylive/
+  - webr
+webr:
+  packages:
+  # CRAN packages installed when page opened
+  - "ggplot2"
+  - "dplyr" # dplyr::`%>%`
+  # - "tidyverse" # avoid to speed up pg load
+  # - "tidygraph"
+  # - "igraph"
+  # - "ggdag"
+execute:
+  echo: true
+  error: true
+  warning: true
+# embed-resources: true
+editor: source
+# Quarto with R => need rmarkdown => knitr engine
+# engine: knitr
+# knitr: 
+#   # also global Knitr options using opts_knit
+#   # https://quarto.org/docs/computations/r.html#knitr-options
+#   opts_chunk: 
+#     # https://yihui.org/knitr/options/
+#     code-fold: true
+#     comment: "#>"
+#     # # https://quarto.org/docs/computations/execution-options.html#figure-options
+#     fig.path: "man/figures/README-"
+#     out.width: "100%"
+#     dev: "cairo_pdf"
+#     R.options:
+#       knitr.graphics.auto_pdf: true
+# # https://quarto.org/docs/computations/python.html
+# # jupyter: python3
+# #
+
+---
+
+
+<!-- README.md is generated from README.qmd. Please edit that file -->
+<!---
+  enclose ALL chunks with {webr-r} - not {r}
+  then play each in webpage sequentially
+  else {r} runs locally only
+  ~/Documents_GitHub/ibrokers/vignettes/webr_dag_golem_owl.qmd
+--->
+
+
+
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+Some text
+[in HTML.]{.content-visible when-format="html"}
+[in PDF.]{.content-visible when-format="pdf"}
+[in GH markdown]{.content-visible when-format="gmd"}
+
+# README "`r params$title`"
+```{r metadata}
+# https://quarto.org/docs/computations/parameters.html#rendering
+# quarto render document.qmd --execute-params params.yml
+# quarto render document.ipynb -P alpha:0.2 -P ratio:0.3
+rmarkdown::metadata
+```
+
+
+## Installation
+
+You can install the development version of somepackage from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("jane/somepackage")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(somepackage)
+## basic example code
+```
+
+What is special about using `README.Rmd` instead of just `README.md`?
+You can include R chunks like so:
+
+```{r cars}
+summary(cars)
+```
+
+You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+`devtools::build_readme()` is handy for this.
+
+You can also embed plots, for example:
+
+```{r pressure, echo = FALSE}
+plot(pressure)
+```
+
+In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+
+
+# About
+
+## Row {.flow}
+
+::: card {.content-visible when-format="gmd"}
+
+::: card-header
+About
+:::
+
+::: card-body
+This dashboard presents 
+:::
+
+:::
+
+# Not About
+
+::: {.content-visible when-format="gmd"}
+<!-- 
+For README.md only (when-format="gmd")
+See below (when-format="html") for  README.html
+-->
+
+# robotwealth.com
+
+The goal of robotwealth.com is build a `{targets}` pipeline of a blog post from robotwealth.com.
+
+-   [https://robotwealth.com/how-to-model-features-as-expected-returns/]
+
+## expected return models
+
+./R/robotwealth.com/expected_returns_models.R
+
+-   features \~ expected returns
+    -   objective
+        -   predict then capitalise on future returns
+    -   intuitive optimisation and implementation
+    -   direct comparison of features
+    -   framework to add/eval old/new signals
+-   common *risk* models
+    -   e.g. covariance estimates
+-   expected return & risk models
+    -   direct comparison with trading costs
+    -   optimisation techniques to trade-off
+        -   return, risk, and turnover given constraints
+
+## Installation
+
+Install the development version of robotwealth.com from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("JohnGavin/robotwealth.com")
+```
+
+## Project files
+
+### File structure
+
+```{r tree}
+#| code-fold: true
+# output: asis
+c('dplyr', 'stringr', 'fs') %>% 
+  sapply(library, 
+    character.only = TRUE, 
+    quietly = TRUE) %>% 
+  invisible()
+excl <- "(figures)|(result)|(objects)|[.](md)|[.](htm)|[.](png)|(files)|(meta)|(old)"
+incl <- "(A-Z)|(R)|(data)|(README)|[.](md)|[.](htm)|[.](yaml)|[.](yml)|[.](qmd)|[.](nix)|[.](R)"
+incl %>% 
+  fs::dir_tree(regexp = ., invert = F, recurse = F) %>% 
+  head(20)
+```
+
+### File sizes
+
+```{r dir_info}
+"." %>% 
+  dir_info(recurse = T) %>% 
+  mutate(modify_date =
+    as.Date(modification_time)) %>% 
+  select(path, size, modify_date) %>% 
+  filter(path %>% 
+    str_detect(pattern = incl, negate = F)) %>% 
+  arrange(desc(size))
+```
+
+## Pipelines
+
+### `targets::tar_make`
+
+```{r tar_config_set}
+#| echo: false
+#| code-fold: true
+
+# library(robotwealth.com)
+library(targets)
+# targets setup
+scr <- "exp_ret_mdl.R"
+str <- "exp_ret_mdl_store"
+targets::tar_config_set(script = scr, store = str)
+```
+Targets code: `{r} scr`.\
+Targets store: `{r} str`.
+
+```{r tar_make}
+targets::tar_make(callr_function = NULL)
+```
+
+### Print data
+
+```{r perps_all}
+tar_read(perps_all)
+```
+
+### Plot graphs
+
+```{r gg_eq_curve_1}
+# TODO: link each plot to 
+# https://robotwealth.com/how-to-model-features-as-expected-returns/
+#| label: gg_eq_curve_1 sdfsdf
+#| fig-cap: Equity crv !expr 'paste("1", "2", sep = "/")'
+# | fig-cap: "Equity curve 1/2)"
+#| fig-alt: "Equity curve 1:"
+#| echo: false
+tar_read(gg_eq_curve_1)
+```
+```{r gg_eq_curve_2}
+#| fig-cap: "Equity curve 2/2)"
+#| fig-alt: "Equity curve 2:"
+tar_read(gg_eq_curve_2)
+```
+```{r gg_trd_buf_param}
+#| fig-cap: "Trade buffer parameter"
+#| fig-alt: "Trade buffer parameter:"
+tar_read(gg_trd_buf_param)
+```
+```{r gg_turnover}
+#| fig-cap: "Trade buffer parameter"
+#| fig-alt: "Trade buffer parameter:"
+tar_read(gg_turnover)
+```
+```{r gg_orig_yes_cost}
+#| fig-cap: "Orig with costs"
+#| fig-alt: "Orig with costs."
+tar_read(gg_orig_yes_cost)
+```
+```{r gg_returns_plot}
+#| fig-cap: "Returns"
+#| fig-alt: "Returns plot."
+tar_read(gg_returns_plot)
+```
+```{r gg_weights_plot}
+#| fig-cap: "weights"
+#| fig-alt: "weights plot."
+tar_read(gg_weights_plot)
+```
+```{r gg_rets_wghts}
+#| fig-cap: "Returns and weights"
+#| fig-alt: "weights plot."
+# FIXME: patchwork not wokring
+#tar_read(gg_rets_wghts)
+```
+
+```{r sessionInfo}
+#| eval: true
+#| code-fold: true
+#| label: sessionInfo
+#| echo: true
+quarto::quarto_version()
+sessioninfo::session_info(include_base = TRUE)
+```
+
+```{bash echo foo}
+# FIXME: echo to render output panel (background job)?
+echo "foo" 
+uname -a # Linux kernel version
+```
+
+:::
+
+::: {.content-visible when-format="html"}
+<!-- 
+For README.md only (when-format="html")
+See below (when-format="gmd") for  README.html
+-->
+
+<!-- 
+
+``` 
+{r reticulate, eval = FALSE}
+#| code-fold: true
+#| eval: false
+# if (!requireNamespace(reticulate)) 
+#   install.packages("reticulate")
+# library(reticulate)
+# reticulate::py_config()
+# reticulate::py_discover_config()
+# # renv::use_python() https://blog.rstudio.com/2019/11/06/renv-project-environments-for-r/#Integration_with_Python
+# reticulate::py_version()
+# TODO: v nix install?
+# py_install(c("polars"))
+# py_run_string('import polars') # fails
+# repl_python() ; import polars # fails
+```
+
+```
+{python sys.version, eval = FALSE}
+#| eval: false
+# import sys
+# print(sys.version)
+```
+-->
+
+:::
+
+# End pagee 1
+
+::: {.block fill="luma(230)" inset="8pt" radius="4pt"}
+
+This is a block with gray background and slightly rounded corners.
+```{r R.version.string}
+R.version.string
+```
+
+
+https://quarto.org/docs/output-formats/typst.html#typst-blocks
+
+:::
+
+
+```{r quarto cli, include = FALSE}
+# https://quarto.org/docs/computations/r.html#chunk-options
+#| eval: false
+#| code-fold: true
+#| label: quarto cli
+#| echo: true
+# system(" quarto preview README.qmd --to default ") # --no-watch-inputs --no-browse
+# 
+# NB: knitr::opts_chunk$set in yaml header above
+# knitr::opts_chunk$set( # now in yaml above
+#   collapse = TRUE, comment = "#>",
+#   fig.path = "man/figures/README-",
+#   out.width = "100%")
+```
