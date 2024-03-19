@@ -1,0 +1,337 @@
+---
+title: "Untitled"
+format: html
+---
+
+# Links
++ https://github.com/b-rodrigues/nix_experiments/blob/master/Dockerfile
++ https://www.brodrigues.co/blog/2023-07-13-nix_for_r_part1/
+
++ worflows
+  + https://github.com/b-rodrigues/rix/tree/master/vignettes
+  + https://github.com/b-rodrigues/rix/tree/master/.github/workflows
+  + https://github.com/JohnGavin/test_nixpkgs/blob/main/.github/workflows/test_pkgs.yml
++ https://www.dontblamethedata.com/blog/big3-grand-slam-difficulty/
++ https://www.dontblamethedata.com/about_me.html
+
++ TODO: football-tonyelhabr
+  + worldfootballR dplyr lubridate tidyr
+  + https://tonyelhabr.rbind.io/posts/fbref-gamestate-expected-goal-difference/
+  + https://github.com/tonyelhabr/itsmetoeknee/blob/main/posts/opta-xg-model-calibration/index.qmd
+
+```{bash nix-build cli, eval = FALSE}
+# nix-build R rPackages.dplyr  -A 
+```
+```{bash, eval = FALSE}
+# docker image ls
+# DEV_PROJ=proj ; export DEV_PROJ ; echo $DEV_PROJ
+# docker build -f Dockerfile --target image_$DEV_PROJ -t ttmmghmm/$DEV_PROJ --build-arg DEV=$DEV_PROJ .
+pwd ; whoami ; root ; ls 
+cat sessionInfo_dev.txt
+nix-shell proj.nix 
+# docker push ttmmghmm/"$DEV_PROJ":latest
+# docker pull ttmmghmm/"$DEV_PROJ":latest
+
+# --build-arg GITHUB_PAT=$GITHUB_PAT --build-arg USERNAME=rstudio .
+# 11 mins / 5.6gb !
+# # GITHUB_PAT to pull priv dotfiles repo
+# echo "$DOCKER_PSWD" | docker login -u ttmmghmm --password-stdin
+# docker tag nix_docker ttmmghmm/nix_docker
+# docker push ttmmghmm/nix_docker:latest
+# docker pull ttmmghmm/nix_docker:latest
+# docker run -ti --rm  ttmmghmm/nix_docker:latest
+# R -q --no-save
+#   --env DATABASE_URL=loremipsum \
+#   --env flag accessible as an env var at _run_time
+
+```
+```{bash, eval = FALSE}
+MYDATA_DIR=/Users/johngavin/Datashare; export MYDATA_DIR
+IP=$(ifconfig en0 | grep 'inet ' | awk '{print $2}'); export IP
+docker run -ti --rm \
+   -w /home/"$DEV_PROJ" \
+   -e DISPLAY=$IP:0 \
+   -v $MYDATA_DIR:/home/"$DEV_PROJ"/data \
+   -v /tmp/.X11-unix:/tmp/.X11-unix \
+   ttmmghmm/"$DEV_PROJ":latest
+```
+
+
+```{r pkgs}
+library(dplyr)
+library(here)
+(path_default_nix <- 
+  here("inst", "ceic"))
+```
+```{r rix_init}
+# .Rprofile should not exclude local subdirs
+# i.e. having a local user lib allows install.packages to work on Macos
+# userlib_paths <- paste(Sys.getenv("R_LIBS_USER"), collapse = "|")
+# user_dir <- grep(userlib_paths, current_paths)
+# sub_dir <- grep(getwd(), userlib_paths)
+# # keep paths that are subdirectories in .libPaths()
+# rm_paths <- setdiff(user_dir, sub_dir)
+# if (length(rm_paths)) .libPaths(-rm_paths)
+
+# ONCE per folder: . or ./.devcontainer
+# ELSE: radian --vanilla THEN
+#   lp <- .libPaths() ; .libPaths(lp[-1])
+# rix_init FIXES this
+rix::rix_init( # only creates ./.Rprofile...
+  project_path = 
+    c(path_default_nix, "./sub_shell")[1],
+  rprofile_action = c(
+    # if not missing do nothing
+    "create_missing", 
+    "create_backup", "overwrite", "append")[1],
+  message_type = c("simple", "verbose")[2]
+) # => isolate Nix env built
+```
+
+
+```{r pkgs}
+pkgs_proj <- #----
+  list(# proj pkgs
+    proj_h = c(
+    'xml2', 'R6', 'zoo', 'httr', 'getPass',
+    'glue', 'here',
+    # from tidyverse,
+    'lubridate'
+  ) )
+ind <- 1:3
+(proj_choice <- c('proj_h', 'proj_m', 'proj_l')[ind])
+(pkgs_projj <-  pkgs_proj[proj_choice] %>% 
+  unlist() %>% unique() %>% sort())
+#   pkgs_projj = c("brms", "posterior", "bayesplot", # FAIL! ld: library not found for -lintl
+pkgs_dev <- #----
+  list(# dev pkgs
+    dev_h = c(
+      'dplyr', 
+      'quarto', "rmarkdown", 
+      'targets', 'tarchetypes', 'visNetwork', 
+      'pacman', "devtools"), # 'fnmate' 
+    # devtools::document() roxygen2 "7.2.3" but need "7.3.1"?!
+    dev_m = c(
+    'stringr', 'purrr', 'readr',
+    'tidyr', 'ggplot2', 'fs',
+    'reticulate'),
+    dev_l = c(
+      'httpgd', # for vscode 'languageserver', 
+      'goodpractice',
+      'rvest', 
+      # 'arrow', 'DBI', 'duckdb',
+      # Quarto => need rmarkdown => knitr engine
+      # https://quarto.org/docs/computations/r.html#output-formats
+      'Cairo'
+      # remotes pak renv
+    ) # dev_l
+  ) # list
+# docker image layers choice?
+dev_choice <- c('dev_h', 'dev_m', 'dev_l')[ind]
+pkgs_dev <-  pkgs_dev[dev_choice] %>% 
+  unlist() %>% unique() %>% sort()
+pkgs_sys <- list(#----
+  sys_h = c(
+    "quarto", 'radianWrapper'
+  ),
+  sys_m = c("oh-my-zsh", 'nano'),
+  sys_l = c(
+    "cairo", 'openssl', 'lazygit'
+# FIXME: gcc clang c++ 
+# install c++ to NIXos? (and _not_ gcc)
+# FIXME: ld: library not found for -lintl
+# #   nix: ld: library not found for -lintl
+    # library not found for -lintlclang-16
+    # 'libclang', 'libgcc'
+    # ld: library not found for -lintl
+    # 'gettext',
+    # 		pkgs.clang_12		pkgs.ccls pkgs.gdb pkgs.gnumake
+    #         "python311",
+    # "python311Packages_pandas"
+    # "python311Packages_polars",
+    # "python311Packages_siuba", 
+    # "numpy", "scipy", 
+    # "seaborn", "scikit-learn",
+# system_pkgs = c("cmake", "gcc", "less", "which", "nano", "git", "quarto", "logger", "locale", "pyenv"),
+  )
+) # list
+# docker image layers choice?
+sys_choice <- c('sys_h', 'sys_m', 'sys_l')[ind]
+pkgs_sys <-  pkgs_sys[sys_choice] %>% 
+  unlist() %>% unique() %>% sort()
+#
+# devtools::check(env_vars = c('_R_CHECK_LICENSE_' = FALSE)) 
+# pkgbuild::check_build_tools(debug = TRUE)
+#
+# Running \
+#   ** /nix/store/...-R-4.3.2/lib/R/bin/R ** \
+#   CMD SHLIB foo.c
+# using C compiler: ‘clang version 16.0.6’
+# using SDK: ‘MacOSX14.2.sdk’
+#
+# Running \
+#   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/bin/R \
+#   CMD SHLIB foo.c
+# using C compiler: ‘Apple clang version 15.0.0 (clang-1500.1.0.2.5)’
+# using SDK: ‘MacOSX14.2.sdk’
+#   mac: Apple clang version 14.0.0 (clang-1400.0.29.202) GNU Fortran (GCC) 12.2.0
+# NB: **nix-shell --pure** 
+#   => radian NA 
+#   => radian from MacOS and NOT Nix!
+#   (to get local settings) 
+pkgs_git <- #----
+  list(
+    git_h = list(
+      list(
+          package_name = "rix",
+          repo_url = "https://github.com/b-rodrigues/rix",
+          branch_name = "master",
+          commit = "6dcc9bcb10dcd1baaa9a7d83bab5d1445f231455")
+    ),
+    git_m = list(
+    ), # list(),
+    git_l = list(
+      # , list(
+      #   # https://github.com/JohnGavin/robotwealth.com/commit/2a6800f911f68fb7598353f5c06f62c01b9d51cd
+      #   package_name = "robotwealth_com",
+      #   repo_url = "https://github.com/JohnGavin/robotwealth.com/",
+      #   branch_name = "master",
+      #   commit = "2a6800f911f68fb7598353f5c06f62c01b9d51cd")
+  ))
+git_choice <- c('git_h', 'git_m', 'git_l')[ind]
+# has to be a list of lists of 4 elements
+pkgs_git <- pkgs_git[git_choice] %>% 
+  unlist(recursive = FALSE)
+# drop empty list()
+for (ii in rev(seq_along(pkgs_git))) # NB: in rev
+  if (identical(pkgs_git[[ii]], list())) 
+    pkgs_git[ii] <- NULL
+shell_hook <- #----
+  # shell_hook: one startup function per project 
+  #   in nix env subshell
+  c(
+    do_nothing = "", 
+    tar_make = "
+      Rscript -e '{
+        pacman::p_load(targets, here, dplyr)
+        # FIXME: got to be a better way!
+        scr <- as.character(quote(exp_ret_mdl.R))
+        str <- as.character(quote(exp_ret_mdl_store))
+        targets::tar_config_set(
+          script = scr, store = str)
+        targets::tar_make(
+          callr_function = NULL
+        )}' ; radian
+    ", 
+      # override defaults targets setup
+      # system_pkgs = "radian" essential
+    radian = "radian --vanilla",
+    # robotwealth.com/.devcontainer/shell_churchman.nix
+    local_lib = '
+      mkdir -p "$(pwd)/_libs" && \
+      export R_LIBS_USER="$(pwd)/_libs" && \
+      R -q --vanilla
+    ',
+    gh_action = "
+      Rscript -e 'rix::tar_nix_ga()'
+      " # GH actions & targets
+  )["do_nothing"] # shell_hook
+# tex_pkgs: build PDF documents using Quarto?
+```
+```{r rix}
+rix::rix(
+    r_ver = "latest",
+	  # TODO: create nix-proj history() ?
+    r_pkgs = c(pkgs_dev, pkgs_projj) %>% 
+      unique() %>% sort(),
+    system_pkgs = pkgs_sys %>% 
+      unique() %>% sort(),
+    git_pkgs = NULL, # pkgs_git,
+# VScode _not_ needed in default.nix!
+# -  use version on your computer
+# ide="code" not install VS Code from Nix
+#   install languageserver for R with VSCode
+# system_pkgs="vscode" project-specific VSCode
+# system_pkgs="vscodium" VSCodium
+# ide ="other" Emacs/Vim/non-interactive scrpts
+# e.g. CI/CD service
+# other editors don't need installtn through nixpkgs to use Nix envs, unlike RStudio;
+# RStudio cannot installed via nixpkgs on macOS
+# if RStudio in Nix env => install via nixpkgs
+    ide = c('other', "code", 'rstudio')[1],
+    project_path = path_default_nix,
+    overwrite = TRUE,
+    print = FALSE,
+    # tex_pkgs = c("amsmath"),
+    # NB: R_LIBS_USER & --pure
+    #   export "R_LIBS_USER"="./_r_libs_user"  
+    #   Sys.setenv("R_LIBS_USER" = "./_r_libs_user") 
+    # nix-shell --pure shell_r_libs_user_local.nix
+    # shellHook
+    shell_hook = 
+    paste("export R_LIBS_USER=_R_LIBS_USER &&",
+      shell_hook)
+) # output -> path_default_nix
+path_default_nix
+# file.remove(".git/hooks/pre-commit")
+```
+```{r nix_build}
+### WARNING: nix_BUILD fun in NIX-SHELL ONLY
+# ./devcontainer/nix-build dev.nix
+# USE rix::rix_init FIRST in .devcontainer
+# path_default_nix <- '.'
+# options(rix.nix_build_max_jobs = 2)⁠
+Sys.setenv(R_LIBS_USER="_R_LIBS_USER")
+# system('export R_LIBS_USER="_R_LIBS_USER"')
+system.time(
+  rix::nix_build(
+    project_path = path_default_nix, 
+    # FAIL: non-blocking in rstudio on mac
+    exec_mode = 
+      c("blocking", "non-blocking")[1])
+)
+#  user  system elapsed 
+# 3.596   2.643 212.330 
+# move ./default.nix to ./.devcontainer (dev|proj).nix 
+inn <- file.path(path_default_nix,
+  'default.nix')
+out <- file.path(path_default_nix, 
+  c('dev.nix', 'proj.nix')[2])
+file.rename(inn, out)
+# ln link for files / -s symbolic link else hard link 
+# https://unix.stackexchange.com/questions/295612/create-link-between-two-existing-files
+# link to here('default.nix') ?
+# glue::glue('ln -f {out} ./default.nix') %>% 
+#   system() # hard link
+# both files point to same file, removing either one doesn't remove file
+# system("nix-shell")
+# WARNING: _now_ console v terminal tab?
+```
+
+```{bash nix-shell, eval = FALSE}
+# use rix::with_nix above
+# nix-shell --pure --run "Rscript --vanilla"
+# --pure not needed cos of rix::rix_init?
+```
+```{r tar_nix_ga, eval = FALSE}
+#	GH actions & targets
+# -> ./.github/workflows/run-pipeline.yaml
+rix::tar_nix_ga() 
+```
+```{r head .libPaths}
+stopifnot("%>% needed => library(dplyr) earlier in this script?" = requireNamespace('dplyr'))
+system('which radian')
+Sys.getenv('R_LIBS_USER')
+ll <- .libPaths()
+library(stringr)
+ll_strip <- function(.) str_replace(., "store/([a-z0-9]+)-", "store/...-")
+head(ll, 4) %>% ll_strip()
+tail(ll, 4)  %>% ll_strip()
+```
+```{r nix R versions}
+stopifnot('rix::available_r needs library(rix) to find rix::r_nix_revs' = require('rix'))
+available_r() # r versions in nix
+library(dplyr)
+rix::r_nix_revs %>% glimpse()
+```
+

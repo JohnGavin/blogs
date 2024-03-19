@@ -156,6 +156,9 @@ In that case, don't forget to commit and push the resulting figure files, so the
 
 # About
 
+*Click for details*
+https://metr.github.io/autonomy-evals-guide/
+
 ## Row {.flow}
 
 ::: card {.content-visible when-format="gmd"}
