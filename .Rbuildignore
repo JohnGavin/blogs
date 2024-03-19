@@ -1,14 +1,17 @@
 ^LICENSE\.md$
-^result.*$
-^.Rproj.user/$
 ^.RHistory$
 ^.RData$
+^.*\.Rproj$
+^\.Rproj\.user$
 ^.DS_Store$
-#.quarto
 # excl soft sym links
+^result.*$
 # find * -type l >> .Rbuildignore
 inst/ceic/rix.qmd
 inst/ceic/usethis_targets.qmd
 inst/ceic/result_ceic
 rix.qmd
 usethis_targets.qmd
+#
+#.quarto
+

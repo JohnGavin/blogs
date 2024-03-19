@@ -1,14 +1,15 @@
 .httr-oauth
 .DS_Store
 .quarto
-^result.*$
-.Rproj.user
+\.Rproj\.user
 .Rhistory
 .Rdata
 # excl soft sym links
+result.*
 # find * -type l >> .gitignore
 inst/ceic/rix.qmd
 inst/ceic/usethis_targets.qmd
 inst/ceic/result_ceic
 rix.qmd
 usethis_targets.qmd
+#
