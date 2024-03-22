@@ -1,3 +1,7 @@
+^.*\.qmd$
+README.qmd
+^README_.*$
+^_targets\..*$
 ^LICENSE\.md$
 ^.RHistory$
 ^.RData$
@@ -15,3 +19,4 @@ usethis_targets.qmd
 #
 #.quarto
 
+^\.github$

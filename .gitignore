@@ -1,7 +1,7 @@
 .httr-oauth
 .DS_Store
 .quarto
-\.Rproj\.user
+.Rproj.user
 .Rhistory
 .Rdata
 # excl soft sym links
@@ -13,4 +13,3 @@ inst/ceic/result_ceic
 rix.qmd
 usethis_targets.qmd
 #
-.Rproj.user
