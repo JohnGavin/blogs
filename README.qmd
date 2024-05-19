@@ -1,17 +1,26 @@
 ---
-# Quarto Publish publish.yml
-# quarto::quarto_render("README.qmd", output_format = "all")
+# system(" quarto preview README.qmd --to default ") # --no-watch-inputs --no-browse
+# https://quarto.org/docs/publishing/quarto-pub.html
+# https://quarto.org/docs/dashboards/layout.html#pages
 # quarto render README.qmd --to html,gfm
+# quarto render README.qmd -P alpha:0.2 -P ratio:0.3
+# https://quarto.org/docs/computations/parameters.html#rendering
+# quarto render README.qmd --execute-params params.yml
 # quarto typst compile README.typ
 # https://quarto.org/docs/publishing/github-pages.html#github-action
 # quarto publish gh-pages README.qmd --no-prompt # --to index.html 
+# quarto publish quarto-pub document.qmd
+# quarto::quarto_render("README.qmd", output_format = "all")
 # https://r-pkgs.org/other-markdown.html#sec-readme
 # https://quarto.org/docs/computations/parameters.html#knitr
 params:
   alpha: 0.1
   ratio: 0.1
-title: pipeline for robotweath.com post param alpha "`r params$alpha`"
-description: targets, webR and dashboard 
+  title: pipeline for robotweath.com post 
+  description: targets, webR and dashboard 
+title: _`r params$title`_
+subtitle: param alpha = `r params$alpha`
+description:  _`r params$description`_
 format:
   dashboard:
     # theme: darkly
@@ -19,14 +28,21 @@ format:
     # theme: default
     # expandable: true
     # scrolling: false
+    #logo: images/penguins.png
+    #nav-buttons: [linkedin, twitter, github]
     nav-buttons:
-     # - reddit
-     - icon: gitlab
-       href: https://gitlab.com/johngavin/robotweath.com
-  # # https://quarto.org/docs/output-formats/typst.html#overview
-  # # ~/Documents_/note_taking_atom/projects/rix/quarto_typst.md
+      - icon: github
+        href: https://gitlab.com/johngavin/robotweath.com
+      # - reddit
+  # https://quarto.org/docs/output-formats/typst.html#overview
+  # ~/Documents_/note_taking_atom/projects/rix/quarto_typst.md
   # Typst creates PDF output
   typst:
+    # https://nrennie.rbind.io/blog/making-pdf-with-quarto-typst-latex/
+    # quarto use template nrennie/PrettyPDF
+    nav-buttons:
+      - icon: github
+        href: https://gitlab.com/johngavin/robotweath.com
     keep-typ: true
     toc-title: Contnts
     toc: true
@@ -36,26 +52,26 @@ format:
     columns: 2
   html:
     theme: darkly
-  # https://quarto.org/docs/computations/r.html#data-frames
   # https://quarto.org/docs/computations/r.html#output-formats
     # paging for row/col overflow
     # pages => add navbar in dashboard 
     # df-print: paged
-    toc: true
+    toc: false
     code-fold: true
     code-summary: "Show code"
     fontsize: "15pt"
     # section-numbering: 1.1.a
     number-sections: true
-    css: styles.css
-output: github_document # /html_document # NB: OLD Rmarkdown
-filters:
+    # css: styles.css
+#output: github_document # /html_document # NB: OLD Rmarkdown
+#filters:
   # https://r-posts.com/add-shiny-in-quarto-blog-with-shinylive/
-  - webr
+#  - webr
 webr:
   packages:
   # CRAN packages installed when page opened
   - "ggplot2"
+  - "ggiraph"
   - "dplyr" # dplyr::`%>%`
   # - "tidyverse" # avoid to speed up pg load
   # - "tidygraph"
@@ -85,7 +101,6 @@ editor: source
 # # https://quarto.org/docs/computations/python.html
 # # jupyter: python3
 # #
-
 ---
 
 
@@ -97,62 +112,33 @@ editor: source
   ~/Documents_GitHub/ibrokers/vignettes/webr_dag_golem_owl.qmd
 --->
 
-
-
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 Some text
 [in HTML.]{.content-visible when-format="html"}
+[in typst]{.content-visible when-format="typ"}
 [in PDF.]{.content-visible when-format="pdf"}
 [in GH markdown]{.content-visible when-format="gmd"}
 
 # README "`r params$title`"
-```{r metadata}
-# https://quarto.org/docs/computations/parameters.html#rendering
-# quarto render document.qmd --execute-params params.yml
-# quarto render document.ipynb -P alpha:0.2 -P ratio:0.3
-rmarkdown::metadata
+```{r title}
+params$title
 ```
 
 
 ## Installation
 
-You can install the development version of somepackage from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("jane/somepackage")
++ development version from [GitHub](https://github.com/)
+``` 
+devtools::install_github("<repo>/<package>")
 ```
 
 ## Example
++  solve a common problem
++ This statement requires further illumination[^1].
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(somepackage)
-## basic example code
-```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-`devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
-
+[^1]: Here lies the deeper exploration of the statement, shining light on the intricacies and supporting information that enrich the narrative.
 
 # About
 
@@ -164,28 +150,96 @@ https://metr.github.io/autonomy-evals-guide/
 ::: card {.content-visible when-format="gmd"}
 
 ::: card-header
-About
+About card-header
 :::
 
 ::: card-body
-This dashboard presents 
+This dashboard presents ... card-body
 :::
 
-:::
 
-# Not About
+## Row {.flow}
 
-::: {.content-visible when-format="gmd"}
+### Not About hdr 3
+
+::: {.content-visible when-format="html"}
 <!-- 
 For README.md only (when-format="gmd")
 See below (when-format="html") for  README.html
 -->
 
+.gmd content only i.e. not in .html
+
+:::
+
+:::
+
+# tabset em
+
+::: {.content-visible when-format="html"}
+
+## tabsett
+test 
+
+::: {.panel-tabset}
+
+## Galaxy Exploration
+
+This tab might contain an overview of your data exploration endeavors, perhaps some narrative on the galaxies you've charted.
+
+## Star Analysis
+
+Here, delve into the analysis of star compositions. This could be an excellent place for a visual plot or detailed statistical breakdown.
+
+In this tab, present your findings on various planets. Interactive charts or data tables could be particularly illuminating here.
+
+<!-- inside the structure from last chunk -->
+
+## Nebulae Visualization
+
+Visualizing the intricate structures of various nebulae encountered.
+
+```{r, eval = FALSE}
+#| label: ggplot
+#| echo: FALSE
+# Create a ggplot object
+p <- ggplot(mtcars, aes(x = wt, y = mpg, tooltip = paste("Weight:", wt, "MPG:", mpg), data_id = row.names(mtcars))) +
+  # NB: NOT geom_point
+  geom_point_interactive()
+# geom_bar_interactive() geom_line_interactive()
+ggiraph::girafe(ggobj = p)
+# library(ggplot2) ; example(ggplot)
+# ggplot(nebulae_data, aes(x=position, y=light_intensity)) + geom_point()
+```
+
+## diagrams
++ https://medium.com/number-around-us/arming-your-data-spaceship-essential-quarto-tips-and-tricks-for-the-modern-explorer-ead0fa787adb
+  + TODO: modals, content on the margin, parallax sections, and various embeddings
+```{mermaid}
+graph TD;
+    A[Data Exploration] -->|Transform| B(Data Modeling);
+    B --> C{Insight Discovery};
+    C -->|Yes| D[Communicate Results];
+    C -->|No| E[Iterate Further];
+```
+
+```{dot}
+digraph G {
+    A -> B;
+    B -> C;
+    C -> D;
+    D -> A;
+}
+```
+
+:::
+
+
 # robotwealth.com
 
-The goal of robotwealth.com is build a `{targets}` pipeline of a blog post from robotwealth.com.
-
--   [https://robotwealth.com/how-to-model-features-as-expected-returns/]
+Goal: build `{targets}` pipeline of
+robotwealth.com blog post.[^2]
+[^2]: [https://robotwealth.com/how-to-model-features-as-expected-returns/]
 
 ## expected return models
 
@@ -210,29 +264,28 @@ Install the development version of robotwealth.com from [GitHub](https://github.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("JohnGavin/robotwealth.com")
+# devtools::install_github("JohnGavin/robotwealth.com")
 ```
 
-## Project files
 
-### File structure
+## File structure
 
 ```{r tree}
 #| code-fold: true
 # output: asis
-c('dplyr', 'stringr', 'fs') %>% 
+c('dplyr', 'stringr', 'fs') |>
   sapply(library, 
     character.only = TRUE, 
     quietly = TRUE) %>% 
   invisible()
 excl <- "(figures)|(result)|(objects)|[.](md)|[.](htm)|[.](png)|(files)|(meta)|(old)"
 incl <- "(A-Z)|(R)|(data)|(README)|[.](md)|[.](htm)|[.](yaml)|[.](yml)|[.](qmd)|[.](nix)|[.](R)"
-incl %>% 
-  fs::dir_tree(regexp = ., invert = F, recurse = F) %>% 
+incl |> 
+  fs::dir_tree(regexp = ., invert = F, recurse = F) |> 
   head(20)
 ```
 
-### File sizes
+## File sizes
 
 ```{r dir_info}
 "." %>% 
@@ -247,7 +300,7 @@ incl %>%
 
 ## Pipelines
 
-### `targets::tar_make`
+## `targets::tar_make`
 
 ```{r tar_config_set}
 #| echo: false
@@ -267,13 +320,13 @@ Targets store: `{r} str`.
 targets::tar_make(callr_function = NULL)
 ```
 
-### Print data
+## Print data
 
 ```{r perps_all}
 tar_read(perps_all)
 ```
 
-### Plot graphs
+## Plot graphs
 
 ```{r gg_eq_curve_1}
 # TODO: link each plot to 
@@ -325,13 +378,13 @@ tar_read(gg_weights_plot)
 ```{r sessionInfo}
 #| eval: true
 #| code-fold: true
+#| echo: false
 #| label: sessionInfo
-#| echo: true
 quarto::quarto_version()
 sessioninfo::session_info(include_base = TRUE)
 ```
 
-```{bash echo foo}
+```{bash echo foo, echo = FALSE, output = FALSE}
 # FIXME: echo to render output panel (background job)?
 echo "foo" 
 uname -a # Linux kernel version
@@ -374,12 +427,13 @@ See below (when-format="gmd") for  README.html
 
 :::
 
-# End pagee 1
+# Notes
 
 ::: {.block fill="luma(230)" inset="8pt" radius="4pt"}
 
 This is a block with gray background and slightly rounded corners.
 ```{r R.version.string}
+#| code-fold: true
 R.version.string
 ```
 

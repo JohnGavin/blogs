@@ -20,3 +20,4 @@ usethis_targets.qmd
 #.quarto
 
 ^\.github$
+^.Rproj.user/$

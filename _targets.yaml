@@ -1,3 +1,9 @@
+exp_ret_mdl:
+  script: exp_ret_mdl.R
+  store: exp_ret_mdl_store
+tar_datageeks.com:
+  script: ./inst/crypto/datageeks.com/tar_datageeks.com.R
+  store: ./inst/crypto/datageeks.com/tar_datageeks.com_store
 main:
   script: exp_ret_mdl.R
   store: exp_ret_mdl_store
