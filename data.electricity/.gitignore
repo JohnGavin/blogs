@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
+^_R_LIB_USER/$
+./\_R\_LIB\_USER/
+old
+README.typ
+result
