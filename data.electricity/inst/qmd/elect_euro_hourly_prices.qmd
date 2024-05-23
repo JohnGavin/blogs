@@ -1,0 +1,62 @@
+---
+params:
+  source: "https://medium.com/towards-data-science/n-beats-the-first-interpretable-deep-learning-model-that-worked-for-time-series-forecasting-06920daadac2"
+  source_data: "https://ember-climate.org/data-catalogue/european-wholesale-electricity-price-data/"
+  source_data_url: "https://ember-climate.org/app/uploads/2023/12/european_wholesale_electricity_price_data_hourly.zip"
+title: "elect_euro_hourly_prices"
+format: html
+---
+
+# TODOs
++ push blogs to GH including this submodule package
++ compile package
++ make_tar()
++ read from url inside {targets}
+  + read from zip file 
+  + read only all_countries.csv
++ tar_read ggplot2
++ https://www.tidyverse.org/blog/2021/03/clock-0-1-0/ for dttm format?
+
+# data
++ https://ember-climate.org/app/uploads/2023/12/european_wholesale_electricity_price_data_hourly.zip
+```{r}
+pacman::p_load(arrow, duckdb, dplyr, lubridate,
+  ggplot2)
+fp <- '/Users/johngavin/Downloads/european_wholesale_electricity_price_data_hourly'
+fn <- 'all_countries.csv'
+fp |> 
+  file.path(fn) |> 
+  arrow::read_csv_arrow() ->
+  dat_raw
+dat_raw |> 
+  rename(
+    dt_utc = `Datetime (UTC)`,
+    dt_local = `Datetime (Local)`,
+    iso = `ISO3 Code`,
+    eur_m_whe = `Price (EUR/MWhe)`,
+    # .keep = "unused", 
+    .before = 1
+    ) ->
+  dat
+  # mutate(dt_utc2 =  
+  #   dt_utc |> parse_date_time(
+  #     # 92k rows are ymd only i.e. no time
+  #     orders = c("ymd HMS", "ymd"))) |> 
+
+  mutate(across(where(is_dttm)),
+    ~ . |> as.POSIXct() |> 
+      format.POSIXct("%Y-%m-%d %H")
+  )
+dat |> glimpse()
+dat |> count(iso)
+nms <- dat |> pull(iso) |> table() |> 
+  sort(decrea = T) |> 
+  head(10) |> names()
+dat |> filter(iso == 'MKD')
+dat |> 
+  filter(iso %in% nms) |> 
+  ggplot(aes(dt_utc, eur_m_whe), 
+    groups = iso, colour = iso) +
+  geom_line() + 
+  facet_wrap(~iso)
+```
