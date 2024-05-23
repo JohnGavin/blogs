@@ -1,7 +1,7 @@
-^LICENSE\.md$
-^.Rproj.user/$
 ^.RHistory$
 ^.RData$
-^.*\.Rproj$
+^.Rproj.user/$
 ^\.Rproj\.user$
-^library$
+^.*\.Rproj$
+^LICENSE\.md$
+^library/$

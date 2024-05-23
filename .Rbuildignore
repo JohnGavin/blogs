@@ -21,3 +21,7 @@ usethis_targets.qmd
 
 ^\.github$
 ^.Rproj.user/$
+
+^_R_LIB_USER/$
+^albert.rapp.de/library/$
+^albert.rapp.de/_R_LIB_USER/$

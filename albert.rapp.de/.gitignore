@@ -8,3 +8,4 @@
 ^.RHistory$
 ^.RData$
 ^library/$
+^_R_LIB_USER$

@@ -16,3 +16,5 @@ usethis_targets.qmd
 ^.Rproj.user/$
 ^.RHistory$
 ^.RData$
+^albert.rapp.de/library/$
+^albert.rapp.de/_R_LIB_USER/$
