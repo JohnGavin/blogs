@@ -7,3 +7,4 @@
 ^.Rproj.user/$
 ^.RHistory$
 ^.RData$
+^library/$
