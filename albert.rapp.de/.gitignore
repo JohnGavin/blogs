@@ -7,5 +7,6 @@
 ^.Rproj.user/$
 ^.RHistory$
 ^.RData$
-^library/$
+library/
+^result$
 ^_R_LIB_USER$

@@ -18,3 +18,11 @@ Suggests:
     here,
     purrr,
     usethis
+Imports: 
+    sf,
+    giscoR,
+    ggiraph,
+    rix (>= 0.6.0),
+    magrittr
+Remotes: 
+    b-rodrigues/rix

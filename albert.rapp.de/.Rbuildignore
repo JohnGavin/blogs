@@ -4,4 +4,7 @@
 ^\.Rproj\.user$
 ^.*\.Rproj$
 ^LICENSE\.md$
-^library/$
+^library$
+^default.nix$
+^result$
+^inst/qmd/giscoR_maps_files$
