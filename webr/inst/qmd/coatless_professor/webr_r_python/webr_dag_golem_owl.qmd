@@ -1,0 +1,238 @@
+---
+description: DAG, Golem and Owl 
+title: webR and dashboard
+# format: html
+format:
+  dashboard:
+    orientation: rows
+    theme: default
+    # expandable: true
+    # scrolling: false
+    nav-buttons:
+     - reddit
+     - icon: gitlab
+       href: https://gitlab.com/Acme
+output: 
+  html_document:
+    number_sections: true
+execute:
+  echo: true
+  error: true
+# embed-resources: true
+editor: source
+engine: knitr
+knitr: 
+  opts_chunk: 
+    collapse: true
+filters:
+  - webr
+# CRAN packages installed when page opened
+webr:
+  packages:
+  # - "ggdag"
+  - "ggplot2"
+  - "dplyr" # dplyr::`%>%`
+  # - "tidyverse" # dplyr::`%>%`
+  # - "tidyr"
+  - "purrr"
+  - "tidygraph"
+  - "igraph"
+  - "ggdag"
+---
+<!---
+  enclose ALL chunks with {webr-r} - not {r}
+  then play each in webpage sequentially
+  else {r} runs locally only
+--->
+
+```{webr-r}
+# hidden code chunk
+# install WebR-ready version from R-universe
+# when the page loads => context setup
+#| context: setup
+#| label: WebR-ready r-universe.dev on page load
+#| echo: false
+# webr::install("igraph", repos = c("https://igraph.r-universe.dev", "https://cran.r-project.org"))
+#webr::install("ggdag", repos = "https://r-causal.r-universe.dev")
+# library(ggdag)
+```
+
+# preamble
+## row 1 
+### Col 1 {height="20%"}
+:::{.callout-note}
+If R-Universe package, install deps manually. e.g. add 
+[`crayon`](https://github.com/r-lib/crayon), 
+a dependency of 
+[`collateral`](https://github.com/jimjam-slam/collateral), to yaml 
+[`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+:::
+### Col 1 
+:::{.callout-tip}
+Tap on textbox code then change it.
+:::
+### Col 1 
+:::{.callout-note collapse="true"}
+## plots
++ basic example with base R plotting
++ install ggplot2
+```{webr-r}
+#| label: base plot
+plot(sin, -pi, 2 * pi)
+```
+:::
+
+
+# DAG 
+
+## Sidebar {.sidebar}
++ Richard McElreath's scientific framework
++ causal inference & model-based stats 
++ analyze effect of smoking on birth weight
+  + mosaicData::babies dataset 
+  + `tidyverse` and `ggdag` packages
+```{webr-r}
+# require(tidyverse) # already loaded in yaml?
+R.version.string %>% paste(1, .) %>% print()
+R.version.string %>% paste(2, .) 
+```
+
+```{r sidebar 2}
+# this chunk runs locally not in webpage
+require(tidyverse)
+R.version.string %>% paste(3, .) %>% print()
+R.version.string %>% paste(4, .) 
+print(R.version.string) 
+```
+
+## DAG: A directed acyclic graph
+### Row 1 {height="50%"}
+#### Column 1
++ draw a causal diagram 
+  + relationship between smoking and birth weight
+  + any potential confounders
+
+#### Column 2
++ causal assumptions 
++ structure of data-generating process
++ identify 
+  + confounding variables
+  + sources of bias
+  + potential interventions
+
+### Row 3 {height="75%"}
+```{webr-r}
+#| label: DAG
+#| fig-cap: |
+#|   In our model of the data science process, you start with data import
+#| fig-alt: |
+#|   A diagram displaying the data science cycle: Import -> Tidy -> Understand 
+require(ggdag)
+dagg <- dagify(
+  bwt ~ smoke + age + parity + race,
+  smoke ~ age + race,
+  age ~ race,
+  labels = c(bwt = "Birth weight",
+             smoke = "Smoking status",
+             age = "Mother's age",
+             parity = "Parity",
+             race = "Race")
+)
+dagg
+# (dagitty::randomDAG(5, .5))
+#(ggdag(dagg) )
+#print(ggdag(dagg))
+#plot(ggdag(dagg))
+```
+
+
+# Golem 
+
+## Golem: A statistical model or estimator 
++ approximates the causal model and data
++ specified using formulas, priors, likelihoods, and algorithms
++ validated by checking its fit, predictions, and diagnostics
+
+
+# Owl 
+
+## Owl: analyze the golem
++ set of procedures and tools 
++ answer the scientific questions
+  + posterior summaries, hypothesis tests, effect sizes, counterfactuals, and sensitivity analyses
+  + simulating data from the statistical model 
+    + to check its validity and robustness
+
+
+```{webr-r}
+# hidden code chunk
+# installs WebR-ready version from R-universe
+# when the page loads => context setup
+# NB: Create R objects while loading in here!
+#| context: setup
+#| label: collateral r-universe.dev
+webr::install("collateral", repos = c("https://jimjam-slam.r-universe.dev"))
+```
+
+:::{.callout-note}
+If R-Universe package, install dependencies manually. e.g. add 
+[`crayon`](https://github.com/r-lib/crayon), 
+a dependency of 
+[`collateral`](https://github.com/jimjam-slam/collateral), to yaml 
+[`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+:::
+:::{.callout-tip}
+Tap on textbox code then change it.
+:::
+
+:::{.callout-note collapse="true"}
+## base plot
++ basic example with base R plotting
++ install ggplot2
+```{webr-r}
+#| label: base plot
+plot(sin, -pi, 2 * pi)
+```
+:::
+
+# Top-level dash-page 
+
+:::{.panel-tabset}
+
+## 1. Operate on groups
+
+```{webr-r}
+#| label: operate-groups
+mtcars |>
+  mutate(
+    qlog = map_peacefully(data, ~ log(.$wt)))
+```
+
+## 2. Add messages
+
+```{webr-r}
+#| label: add-messages
+mtcars |>
+  mutate(
+    qlog = map_peacefully(data, ~ log(.$wt)),
+    warn_msg = purrr::map_chr(qlog,
+      \(x) paste(x$warnings, collapse = ", ")))
+```
+
+:::
+
+# Notes
+```{webr-r}
+fit = lm(mpg ~ am, data = mtcars)
+summary(fit)
+```
+
+```{r sessionInfo}
+#| collapse: TRUE
+#| echo: FALSE
+# this chunk runs locally not in webpage
+R.version.string %>% paste(3, .) %>% print()
+R.version.string %>% paste(4, .) 
+print(R.version.string) 
+sessionInfo()
+```

@@ -1,0 +1,111 @@
+---
+title: webR in Quarto HTML Documents
+format: html
+execute:
+  echo: false
+  error: true
+engine: knitr
+filters:
+  - "webr"
+# CRAN packages installed when page opened
+webr:
+  packages:
+  - "dplyr"
+  - "tidyr"
+  - "purrr"
+  - "tibble"
+  - "crayon"
+  - "igraph" 
+  - "ggdag" 
+---
+
++ [Source](https://www.rostrum.blog/posts/2024-01-20-webr-remote)
++ install an R-Universe package
+  + => install its dependencies manually
+  + e.g. add `crayon` to yaml `webr.packages`
+    + `crayon` a dependency of `collateral`
+
+
+```{webr-r}
+#| context: setup
+#| label: install igraph
+# hidden code chunk
+# installs WebR-ready version from R-universe
+# when the page loads => context setup
+webr::install("igraph", repos = "https://igraph.r-universe.dev")
+```
+```{webr-r}
+#| context: setup
+#| label: install collateral
+webr::install("collateral", repos = c("https://jimjam-slam.r-universe.dev"))
+```
+```{webr-r}
+#| context: setup
+#| label: nested_mtcars
+mtcars |>
+  tibble::rownames_to_column(var = "car") |>
+  tibble::as_tibble() |>
+  dplyr::select(car, cyl, disp, wt) |>
+  # spike some rows in cyl == 4 to make them fail
+  dplyr::mutate(wt = dplyr::case_when(
+    wt < 2 ~ -wt,
+    TRUE ~ wt)) %>% 
+    # nest and do some operations quietly()
+  nest(data = -cyl) ->
+  nested_mtcars
+```
+:::{.callout-note}
+If you install an R-Universe package, you currently have to install its dependencies manually. For example, I added `crayon`, a dependency of `collateral`, to my frontmatter under `webr.packages`.
+:::
+:::{.callout-tip}
+Try tapping on that textbox and changing the code to `bad_mtcars |> summary()`.
+:::
+
+:::{.callout-note collapse="true"}
+
+## Yes, it can do plots too
+
+This post's example with `{collateral}` just has text output, but yes, `quarto-webr` can do plots too! Here's a basic example with base R plotting, but you can install ggplot2 and any of your usual extensions through CRAN or R-Universe, of course!
+
+```{webr-r}
+#| label: plot-demo
+plot(sin, -pi, 2 * pi)
+```
+
+:::
+
+:::{.panel-tabset}
+
+## 1. Operate on groups
+
+```{webr-r}
+#| label: operate-groups
+nested_mtcars |>
+  mutate(
+    qlog = collateral::map_peacefully(data, ~ log(.$wt)))
+```
+
+## 2. Add messages
+
+```{webr-r}
+#| label: add-messages
+nested_mtcars |>
+  mutate(
+    qlog = map_peacefully(data, ~ log(.$wt)),
+    warn_msg = purrr::map_chr(qlog,
+      \(x) paste(x$warnings, collapse = ", ")))
+```
+
+:::
+
+
+
+# header 1
+This is a webR-enabled code cell in a Quarto HTML document.
+
+```{webr-r}
+#| label: fit summary
+fit = lm(mpg ~ am, data = mtcars)
+
+summary(fit)
+```

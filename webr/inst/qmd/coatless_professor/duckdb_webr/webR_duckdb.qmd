@@ -1,0 +1,373 @@
+---
+# install quarto-web from project's here() 
+#   quarto add coatless/quarto-web # -> Terminal
+#   quarto add --no-prompt coatless/quarto-webr
+#   quarto add --no-prompt coatless-quarto/pyodide
+# https://quarto-webr.thecoatlessprofessor.com/
+#   https://quarto-webr.thecoatlessprofessor.com/examples/readme/
+#   https://github.com/coatless/quarto-webr/tree/main
+#   https://quarto.org/docs/extensions/
+#webr
+# reads data from ./inst/extdata/data_raw
+# 
+# TODO: pass params into sql and capture output
+# 
+params:
+  pkgs:
+    - "ggplot2"
+    - "readr"
+    - "arrow"
+    - "dplyr"
+    - "duckdb"
+    - "glue"
+    - "here"
+    # - "ggokabeito"
+    - "igraph"    
+format: 
+  html:
+    resources:
+      - data/*.parquet
+execute:
+  echo: true
+  error: true
+  message: false
+  warning: false
+  fig-align: center
+  fig-width: 12
+  fig-height: 8
+  editor_options: 
+    chunk_output_type: inline
+    code-overflow: wrap
+    code-fold: true
+    code-tools: true
+engine: knitr
+filters:
+  - "webr"
+title: duckdb, webR virt file sys
+output: 
+  html_document:
+    number_sections: true
+# CRAN packages installed when page opened
+webr:
+  # https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#show-header-message
+  show-header-message: true
+  # https://quarto-webr.thecoatlessprofessor.com/demos/qwebr-feature-demos.html
+  cell-options:
+    out-width: "100%"
+    autorun: true   # display results as doc first loads
+    # context how the cell should operate on the page
+    # https://quarto-webr.thecoatlessprofessor.com/qwebr-cell-options.html#run-options
+    # https://quarto-webr.thecoatlessprofessor.com/demos/qwebr-global-cell-defaults.html#cell-options-document-key
+    context: "interactive" # setup (used by later cells) interactive output (no code shown)
+    read-only: true
+    results: asis # markup
+  # https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#autoload-packages
+  packages: "`r params$pkgs`"
+---
+
+<!---
+enclose ALL chunks with {webr-r} - not {r}
+then play each in webpage sequentially
+else {r} runs _locally only_
+
+https://quarto-webr.thecoatlessprofessor.com/examples/revealjs/#/embedded-slides
+--->
+
+
+```{r params_r, message=FALSE}
+(pkgs <- params$pkgs) # params are NA in webr chunk
+pkgs |> sapply(library, char = T) |> invisible()
+```
+```{webr virt file sys}
+#| autorun: true
+#| context: setup
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-loading-data.html
+# virtual file sys home == working = /home/web_user
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#home-dir
+getwd()
+list.files(path = ".", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+
+url <- "https://coatless.github.io/raw-data/flights.csv"
+download.file(url, "flights.csv")
+list.files()
+flights_from_csv <- read.csv("flights.csv")
+cat("Let's view the first 6 observations of data:\n")
+head(flights_from_csv)
+```
+
+
+:::{.callout-note collapse="false"}
+If R-Universe package, 
+install dependencies manually. 
+e.g. add 
+[`crayon`](https://github.com/r-lib/crayon), 
+a dependency of 
+[`collateral`](https://github.com/jimjam-slam/collateral), 
+to yaml 
+[`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+:::
+:::{.callout-tip}
+Tap on textbox code then change it,
+if `autorun: true`.
+:::
+
+
+# Top-level page ----
+
++ Refined Oil Pack - Advanced
+  + trial data history from Jan 1, 2013 to present
++ Crude Oil Pack
+  + trial data history from June 1, 2010 to present
+```{r where to load local zips from}
+fp <- here("inst", "extdata", "data_raw")
+fns <- c(
+  "crude-pack-historical-2024-01-31.csv.zip",
+  "ref-prod-historical-2024-01-31.csv.zip"
+)
+get_csv_dat <- function(fn, fp, n_max = Inf){
+  fp %>% 
+  here(fn) %>% 
+  read_csv(show_col_types = FALSE, n_max = n_max) %>%
+  mutate_if(is.character, as.factor) 
+  # mutate(across(where(is_character), as_factor))
+}
+```
+```{r load local zips}
+system.time(
+  # oil_refined slow cos of file size
+  dat <- fns |> sapply(get_csv_dat, fp)
+)
+names(dat) <- c("oil_crude", "oil_refined")
+dat |> str()
+```
+
+# USA only 
++ filter USA-only into parquet/csv
+  + both import and exports data 
++ TODO: only writes locally so render write is _lost_?
+
+## where to write usa output
+```{r where to write usa output}
+fp <- here("data")
+if (!dir.exists(fp)) dir.create(fp)
+usa_out <- paste0(
+  "oil_", c("crude_usa", "oil_refined"), 
+  c(".parquet", ".csv")[1]
+)
+```
+
+## write usa parquets
+```{r write usa parquets}
+del_fn <- function(fn) 
+  if (dir.exists(fn)) unlink(fn, recursive = TRUE)
+```
+## delete old folder if exists, then write parquet
+```{r delete old then write parquet}
+# delete old folder if exists, then write parquet
+fp_usa <- here(fp, usa_out)
+del_fn(fp_usa[1])
+dat$oil_crude %>% 
+  filter(ISOcountry == "US") %>%
+  group_by(ISOcountry) |> 
+  arrow::write_parquet(sink = fp_usa[1])
+
+del_fn(fp_usa[2])
+dat$oil_refined %>% 
+  filter(country == "USA") %>%
+  group_by(direction) |> 
+  arrow::write_parquet(sink = fp_usa[2])
+```
+## what files were created
+```{r what files were created, message=FALSE}
+list.files(fp)
+fp_usa |> 
+  lapply(file.info) |> 
+  str(list.len = 2)
+```
+## read usa parquets
+```{webr read usa parquets}
+get_prqt_dat <- function(fn, fp){
+  fp %>% 
+  here(fn) %>% 
+  arrow::read_parquet() %>%
+  mutate_if(is.character, as.factor) 
+}
+list.files(fp)
+prqt_us <- fp_usa |> 
+  sapply(arrow::read_parquet)
+names(prqt_us) <- c("oil_crude", "oil_refined")
+prqt_us |> lapply(glimpse) |> invisible()
+```
+<!--
+```{r read usa csvs}
+csv_us <- fns |> sapply(get_csv_dat, fp)
+names(csv_us) <- c("oil_crude", "oil_refined")
+csv_us |> str()
+```
+-->
+
+:::{.panel-tabset}
+
+## 1. parquet -> duckdb
+
+```{webr-r}
+# TODO: pin(url)
+#| label: duckdb
+(cnx <- dbConnect(duckdb()))
+```
+
+
+## 2. `CREATE VIEW`
++ download local copy of french baby names
++ create a duckdb view
+```{webr-r}
+#| label: create view
+destfile_str <- 'fp_usa'
+fp_usa |> 
+  sapply(dir) 
+
+dbSendQuery(cnx, glue("
+  CREATE VIEW oil_refined AS
+    SELECT * 
+    FROM '{destfile_str}'
+    WHERE annais <> 'XXXX'"))
+rm(destfile_str)
+```
+
+
+
+:::
+
+# Top-level page 2
+
+:::{.panel-tabset}
+
+## 1. dbGetQuery 
++ test queries
+```{webr-r}
+# DESCRIBE
+dbGetQuery(cnx, "
+  DESCRIBE prenoms")
+# COUNT
+dbGetQuery(cnx,"
+  SELECT COUNT(*)
+  FROM prenoms")
+# MIN/MAX
+dbGetQuery(cnx,"
+  SELECT MIN(annais), MAX(annais)
+  FROM prenoms")
+```
+
+## 2. dbGetQuery -> `INNER JOIN`
+```{webr-r}
+top_2022 <- dbGetQuery(cnx, 
+  "
+  WITH top AS (
+    SELECT preusuel
+    FROM prenoms
+    WHERE annais = '2022'
+      AND preusuel <> '_PRENOMS_RARES'
+    ORDER BY nombre DESC
+    LIMIT 9
+  )
+  SELECT 
+    p.preusuel,
+    p.annais,
+    p.nombre
+  FROM prenoms p
+  INNER JOIN top ON p.preusuel = top.preusuel
+  "
+)
+```
+
+## 3. ggplot
+
+```{webr-r}
+#| fig-cap: |
+#|   In our model of the data science process, you start with data import
+#| fig-alt: |
+#|   A diagram displaying the data science cycle: Import -> Tidy -> Understand 
+#| context: output
+#| fig-width: 5
+#| fig-height: 3
+#| out-width/out-height physical space units
+#| out-width: 500px
+top_2022 |> 
+  mutate(annais = as.integer(annais)) |> 
+  filter(nombre > 100) |> 
+  ggplot(aes(annais, nombre, color = preusuel)) +
+    geom_line(lwd = .8) +
+    scale_color_okabe_ito() +
+    labs(title = glue("2022 names"),
+         subtitle = "Most popular in France",
+         x = "year",
+         y = bquote(N[birth]),
+         color = "names",
+         caption = glue("données INSEE (icem7) https://www.data.gouv.fr/fr/datasets/base-prenoms-insee-format-parquet/
+                        https://r.iresmi.net/ {Sys.time()}")) +
+    theme_minimal() +
+    theme(plot.caption = element_text(size = 6),
+          plot.background = element_rect(fill = "white"))
+```
+
+:::
+
+# Notes
++ [r.iresmi.net](https://r.iresmi.net/posts/2024/webr/index.html)
+  + [jamesgoldie.dev](https://jamesgoldie.dev/writing/your-new-r-package-webr/)
+  + [www.rostrum.blog](https://www.rostrum.blog/posts/2024-01-20-webr-remote/)
+  + https://webr.r-wasm.org/latest/
+
++ [Ref](https://github.com/coatless/quarto-webr)
++ install an R-Universe package
+  + => install its dependencies manually
+  + e.g. add 
+  [`crayon`](https://github.com/r-lib/crayon)
+  to yaml 
+  [`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+    + [`crayon`](https://github.com/r-lib/crayon)
+    a dependency of 
+    [`collateral`](https://github.com/jimjam-slam/collateral)
+
+
+
+:::{.callout-note collapse="true"}
+## base plot
++ basic example with base R plotting
++ install ggplot2
+```{webr-r}
+#| label: base plot
+plot(sin, -pi, 2 * pi)
+```
+:::
+
+```{webr, warning=FALSE}
+# NB: Create R objects while loading in here!
+#| context: setup # v interactive
+#| read-only: true
+#| label: webr::install igraph
+# webr filter cosmetic warning re language engine ‘webr’ #| warning: FALSE # no get_engine(options$engine)  warning
+# hidden code chunk
+# installs WebR-ready version from R-universe
+# when the page loads => context setup
+
+# use yaml header to install at startup
+# webr::install("igraph", repos = "https://igraph.r-universe.dev")
+# pacman::p_load(tidyverse, here)
+```
+```{webr, warning=FALSE}
+#| warning: FALSE
+# context: setup
+# Install the binary from a custom repository
+webr::install(
+  "demorwasmbinary", 
+  repos = "https://tutorials.thecoatlessprofessor.com/webr-unified-gh-workflow/"
+)
+library("demorwasmbinary")
+```
+```{webr}
+# Check to see if the function works
+demorwasmbinary::in_webr()
+# View help documentation
+?demorwasmbinary::in_webr
+```

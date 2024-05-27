@@ -1,0 +1,193 @@
+---
+title: webR in Quarto HTML Documents
+format: html
+output: 
+  html_document:
+    number_sections: true
+execute:
+  echo: false
+  error: true
+engine: knitr
+filters:
+  - "webr"
+# CRAN packages installed when page opened
+webr:
+  packages:
+    - "ggplot2"
+    - "dplyr"
+    - "duckdb"
+    - "glue"
+    - "ggokabeito"
+---
+
+
+<!---
+enclose ALL chunks with {webr-r} - not {r}
+then play each in webpage sequentially
+else {r} runs locally only
+--->
+
+```{webr-r}
+# NB: Create R objects while loading in here!
+#| context: setup
+#| label: install igraph
+# hidden code chunk
+# installs WebR-ready version from R-universe
+# when the page loads => context setup
+webr::install("igraph", repos = "https://igraph.r-universe.dev")
+```
+
+:::{.callout-note}
+If R-Universe package, install dependencies manually. e.g. add 
+[`crayon`](https://github.com/r-lib/crayon), 
+a dependency of 
+[`collateral`](https://github.com/jimjam-slam/collateral), to yaml 
+[`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+:::
+:::{.callout-tip}
+Tap on textbox code then change it.
+:::
+
+:::{.callout-note collapse="true"}
+## base plot
++ basic example with base R plotting
++ install ggplot2
+```{webr-r}
+#| label: base plot
+plot(sin, -pi, 2 * pi)
+```
+:::
+
+# Top-level page 
+
+:::{.panel-tabset}
+
+## 1. parquet -> duckdb
+
+```{webr-r}
+#| label: download url
+destfile_str <- "prenoms-nat2022.parquet"
+url <- "https://static.data.gouv.fr/resources/base-prenoms-insee-format-parquet/20231121-161435/prenoms-nat2022.parquet"
+download.file(url = url, destfile = destfile_str)
+```
+
+
+## 2. `CREATE VIEW`
++ download local copy of french baby names
++ create a duckdb view
+```{webr-r}
+#| label: cnx FAILS
+(cnx <- dbConnect(duckdb()))
+dbSendQuery(cnx, glue("
+  CREATE VIEW prenoms AS
+    SELECT * 
+    FROM '{destfile_str}'
+    WHERE annais <> 'XXXX'"))
+rm(destfile_str)
+```
+
+## 3. _fails_: DuckDB extension `httpfs` 
++ can’t install (yet) DuckDB extension `httpfs`
++ so this code _fails_ with an `error`
+```{webr-r}
+#| eval: FALSE
+#| label: duckdb FAILS
+# To do once:
+dbExecute(cnx, "INSTALL httpfs")
+
+dbExecute(cnx, "LOAD httpfs")
+dbSendQuery(cnx, glue("
+  CREATE VIEW prenoms AS
+    SELECT * 
+    FROM '{url}'
+    WHERE annais <> 'XXXX'"))
+rm(url)
+```
+
+:::
+
+# Top-level page 2
+
+:::{.panel-tabset}
+
+## 1. dbGetQuery 
++ test queries
+```{webr-r}
+# DESCRIBE
+dbGetQuery(cnx, "
+  DESCRIBE prenoms")
+# COUNT
+dbGetQuery(cnx,"
+  SELECT COUNT(*)
+  FROM prenoms")
+# MIN/MAX
+dbGetQuery(cnx,"
+  SELECT MIN(annais), MAX(annais)
+  FROM prenoms")
+```
+
+## 2. dbGetQuery -> `INNER JOIN`
+```{webr-r}
+top_2022 <- dbGetQuery(cnx, 
+  "
+  WITH top AS (
+    SELECT preusuel
+    FROM prenoms
+    WHERE annais = '2022'
+      AND preusuel <> '_PRENOMS_RARES'
+    ORDER BY nombre DESC
+    LIMIT 9
+  )
+  SELECT 
+    p.preusuel,
+    p.annais,
+    p.nombre
+  FROM prenoms p
+  INNER JOIN top ON p.preusuel = top.preusuel
+  "
+)
+```
+
+## 3. ggplot
+
+```{webr-r}
+#| fig-cap: |
+#|   In our model of the data science process, you start with data import
+#| fig-alt: |
+#|   A diagram displaying the data science cycle: Import -> Tidy -> Understand 
+top_2022 |> 
+  mutate(annais = as.integer(annais)) |> 
+  filter(nombre > 100) |> 
+  ggplot(aes(annais, nombre, color = preusuel)) +
+    geom_line(lwd = .8) +
+    scale_color_okabe_ito() +
+    labs(title = glue("2022 names"),
+         subtitle = "Most popular in France",
+         x = "year",
+         y = bquote(N[birth]),
+         color = "names",
+         caption = glue("données INSEE (icem7) https://www.data.gouv.fr/fr/datasets/base-prenoms-insee-format-parquet/
+                        https://r.iresmi.net/ {Sys.time()}")) +
+    theme_minimal() +
+    theme(plot.caption = element_text(size = 6),
+          plot.background = element_rect(fill = "white"))
+```
+
+:::
+
+# Notes
++ [r.iresmi.net](https://r.iresmi.net/posts/2024/webr/index.html)
+  + [jamesgoldie.dev](https://jamesgoldie.dev/writing/your-new-r-package-webr/)
+  + [www.rostrum.blog](https://www.rostrum.blog/posts/2024-01-20-webr-remote/)
+  + https://webr.r-wasm.org/latest/
+
++ [Ref](https://github.com/coatless/quarto-webr)
++ install an R-Universe package
+  + => install its dependencies manually
+  + e.g. add 
+  [`crayon`](https://github.com/r-lib/crayon)
+  to yaml 
+  [`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+    + [`crayon`](https://github.com/r-lib/crayon)
+    a dependency of 
+    [`collateral`](https://github.com/jimjam-slam/collateral)

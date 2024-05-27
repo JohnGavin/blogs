@@ -1,0 +1,63 @@
+---
+title: "Untitled"
+date: today # "`r Sys.Date()`"
+format: html
+engine: knitr
+filters:
+  - webr
+  - pyodide
+webr: 
+  show-startup-message: false # disable webR status 
+  packages: ['ggplot2', 'dplyr'] # install on document open
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-internal-cell.html
+context: output # only shows the output
+# context: setup # shows neither output nor code.
+---
+
+# reuse code chunks
++ as well as results = "asis" 
+  + to create code chunk from within another (parent) code chunk
+```{r knit_code, eval = FALSE}
+knitr::knit_code$get()
+```
+
+ to 
+
+```{webr-r}
+#| autorun: true
+#| fig-width: 5
+# library(tidyverse) # dowload at run time
+library(dplyr)
+#examples(ggplot)
+```
+
+```{pyodide-python}
+import sys
+sys.version
+```
+
+https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+
+This is a webR-enabled code cell 
+in a Quarto HTML document.
+
+```{webr-r}
+#| eval: !expr 1:2 # eval first two lines only
+# https://quarto.org/docs/reference/cells/cells-knitr.html#code-output 
+# https://yihui.org/knitr/demo/reference/
+fit = lm(mpg ~ am, data = mtcars)
+
+summary(fit)
+```
+
+```{r arrow}
+# TODO: yyyy-mm as yearmon then numeric string?
+prqt <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-0', 1:9, '.parquet')[1]
+library(arrow)
+# TODO: dynamic target read - skip if fails?
+# dat <- read_parquet(prqt)
+```
+```{webr-r}
+1+1
+```
+

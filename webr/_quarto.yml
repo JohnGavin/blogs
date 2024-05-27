@@ -1,0 +1,30 @@
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#global-configuration
+
+# force Quarto command line execution rel to command line folder
+#   i.e. specify working dir for rendering files within project
+#   e.g. when running background job in Rstudio
+#   default: working dir is dir of qmd file itself e.g. ./inst/qmd/
+project:
+  execute-dir: project
+  type: website
+  resources:
+    - data/*.parquet
+
+## Global Configuration
+## https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#global-configuration
+#
+# project:
+#   type: book
+#
+# book:
+#   title: "Sample quarto-webr Book Project"
+#   # ... more options
+#
+# # Set default options for every bookpage that may or may not include webR.
+# webr:
+#   show-startup-message: false    # Disable displaying status of webR initialization
+#   packages: ['ggplot2', 'dplyr'] # Install R packages on document open
+#
+# # Attach webR extension for the project
+# filters:
+#   - webr
