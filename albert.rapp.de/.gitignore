@@ -8,5 +8,7 @@
 ^.RHistory$
 ^.RData$
 library/
-^result$
+library
+result
 ^_R_LIB_USER$
+_R_LIB_USER/
