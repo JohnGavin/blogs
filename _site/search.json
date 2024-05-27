@@ -1,0 +1,121 @@
+[
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html",
+    "title": "duckdb, webR virt file sys",
+    "section": "",
+    "text": "(pkgs &lt;- params$pkgs) # params are NA in webr chunk\n\n[1] \"ggplot2\" \"readr\"   \"arrow\"   \"dplyr\"   \"duckdb\"  \"glue\"    \"here\"   \n[8] \"igraph\" \n\npkgs |&gt; sapply(library, char = T) |&gt; invisible()\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output",
+    "title": "duckdb, webR virt file sys",
+    "section": "where to write usa output",
+    "text": "where to write usa output\n\nfp &lt;- here(\"data\")\nif (!dir.exists(fp)) dir.create(fp)\nusa_out &lt;- paste0(\n  \"oil_\", c(\"crude_usa\", \"oil_refined\"), \n  c(\".parquet\", \".csv\")[1]\n)"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#write-usa-parquets",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#write-usa-parquets",
+    "title": "duckdb, webR virt file sys",
+    "section": "write usa parquets",
+    "text": "write usa parquets\n\ndel_fn &lt;- function(fn) \n  if (dir.exists(fn)) unlink(fn, recursive = TRUE)"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#delete-old-folder-if-exists-then-write-parquet",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#delete-old-folder-if-exists-then-write-parquet",
+    "title": "duckdb, webR virt file sys",
+    "section": "delete old folder if exists, then write parquet",
+    "text": "delete old folder if exists, then write parquet\n\n# delete old folder if exists, then write parquet\nfp_usa &lt;- here(fp, usa_out)\ndel_fn(fp_usa[1])\ndat$oil_crude %&gt;% \n  filter(ISOcountry == \"US\") %&gt;%\n  group_by(ISOcountry) |&gt; \n  arrow::write_parquet(sink = fp_usa[1])\n\ndel_fn(fp_usa[2])\ndat$oil_refined %&gt;% \n  filter(country == \"USA\") %&gt;%\n  group_by(direction) |&gt; \n  arrow::write_parquet(sink = fp_usa[2])"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#what-files-were-created",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#what-files-were-created",
+    "title": "duckdb, webR virt file sys",
+    "section": "what files were created",
+    "text": "what files were created\n\nlist.files(fp)\n\n[1] \"oil_crude_usa.parquet\"   \"oil_oil_refined.parquet\"\n\nfp_usa |&gt; \n  lapply(file.info) |&gt; \n  str(list.len = 2)\n\nList of 2\n $ :'data.frame':   1 obs. of  10 variables:\n  ..$ size  : num 749377\n  ..$ isdir : logi FALSE\n  .. [list output truncated]\n $ :'data.frame':   1 obs. of  10 variables:\n  ..$ size  : num 2205163\n  ..$ isdir : logi FALSE\n  .. [list output truncated]"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#read-usa-parquets",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#read-usa-parquets",
+    "title": "duckdb, webR virt file sys",
+    "section": "read usa parquets",
+    "text": "read usa parquets\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n1. parquet -&gt; duckdb2. CREATE VIEW\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/old/usethis_targets.html",
+    "href": "inst/qmd/old/usethis_targets.html",
+    "title": "usethis targets",
+    "section": "",
+    "text": "knitr::opts_chunk$set(eval = FALSE)"
+  },
+  {
+    "objectID": "inst/qmd/old/usethis_targets.html#github_actions",
+    "href": "inst/qmd/old/usethis_targets.html#github_actions",
+    "title": "usethis targets",
+    "section": "github_actions",
+    "text": "github_actions\n\nRIX GH workflows\n\nhttps://github.com/b-rodrigues/rix/tree/master/.github/workflows\nhttps://github.com/JohnGavin/test_nixpkgs/blob/main/.github/workflows/test_pkgs.yml\nhttps://orchid00.github.io/actions_sandbox/index.html#what-are-github-actions ’’‘{r} usethis::use_github_action_check_standard(save_as = “R-CMD-check.yaml”) usethis::use_github_action_check_release(save_as = “R-CMD-check.yaml”) use_github_action()’’’\n\nhttps://orchid00.github.io/actions_sandbox/index.html#what-are-github-actions\nhttps://docs.ropensci.org/targets/reference/tar_github_actions.html\nhttps://github.com/ThinkR-open/attachment/blob/master/dev/dev_history.R\nhttps://ryo-n7.github.io/2021-09-23-CanPL-GoogleDrive-GithubActions-Tutorial/\n\nWrite .github/workflows/targets.yaml workflow file and commit this file to Git\n\ntar_github_actions()\n\nupload the results to the targets-runs branch of your repository.\nSubsequent runs add new commits but not necessarily rerun targets\n\nIf CI (GH actions) yaml uses devtools::install()\n\n=&gt; Suggests packages not installed\n\n=&gt; devtools::install()(dep = TRUE) in your yaml file ?\n\n\n{svglite} in {ggplot2}’s suggests, not imports\n\nhttps://rtask.thinkr.fr/tame-your-namespace-with-a-dash-of-suggests\nhttps://rtask.thinkr.fr/checkhelper-is-on-cran-so-you-dont-have-to-be-afraid-to-run-a-check/\nAdding {svglite} to Depends\n\ndevtools::check() warns if mandatory dependencies (imports) &gt; 21\n\n=&gt; put as many dependencies as possible in Suggests\nSuggests iff\ndependencies intended for developers (e.g. {testthat})\nvignettes call ggplot2::ggplot (https://adv-r.hadley.nz/)\n\n=&gt; Suggests: ggplots\n\nnot necessarily useful to user, including :\n\npackages associated with functions that are rarely used by the user!\npackages used only in examples, tests and/or vignettes\n\n\nif dependency on {svglite} in deptrapr::save_plot() :\n\nimports if : save_plot() is a flagship function of the package it is regularly used (in which case we can add svg to the default formats)\nsuggest if : save_plot() is a very rarely used function it is only used in the save_plot() example Note that, with this way of doing things, no need to wait until you’ve got 21 dependencies to start sorting, right ?\n\n\ndelete previous roxygen2 line to remove the {svglite} imports\n\nusethis::usepackage(package = \"svglite\", type = \"Suggests\")\nAND suggests =&gt; add if(requireNamespace()) {…} else {…}\n\ncf usethis::usepackage() output\n\n\navoid conflicts: Packages not imported\n\n=&gt; not part of the NAMESPACE\n=&gt; call as pkg::function() in your code\n\ne.g. ALL Suggests functions used?\n\n\n\n{attachment} makes it easier to manage the dependencies\n\nif not going to CRAN move all to Depends usethis::\n\nauto-manages DESCRIPTION &lt;-&gt; NAMESPACE mapping\n\n\n```{r] # andto write the pipeline using the tar_target() function pkgs_proj &lt;- c( # # proj pkgs from rix::rix( … ) ‘sandwich’, ‘lmtest’, ‘tidyfit’, ‘tibbletime’, ‘roll’, ‘patchwork’, ‘tarchetypes’, ‘fs’, ‘glue’, ‘here’ # from tidyverse, # ‘lubridate’ ) pkgs_proj %&gt;% purrr::map(~ usethis::use_package(., “Imports”) ) use_package(“pacman”, “Imports”) # yes if in code use_package(“purrr”, “Imports”) # yes if in code use_package(“stringr”) # needed in plan_preamble.R # use_package(here() %&gt;% basename(), “Depends”) # exporting funs ?"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/ems_r_py/webr-r.qmd.html",
+    "href": "inst/qmd/coatless_professor/ems_r_py/webr-r.qmd.html",
+    "title": "Untitled",
+    "section": "",
+    "text": "reuse code chunks\n\nas well as results = “asis”\n\nto create code chunk from within another (parent) code chunk\n\n\n\nknitr::knit_code$get()\n\nto\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\nhttps://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page\nThis is a webR-enabled code cell in a Quarto HTML document.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n# TODO: yyyy-mm as yearmon then numeric string?\nprqt &lt;- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-0', 1:9, '.parquet')[1]\nlibrary(arrow)\n\nSome features are not enabled in this build of Arrow. Run `arrow_info()` for more information.\n\n\nThe repository you retrieved Arrow from did not include all of Arrow's features.\nYou can install a fully-featured version by running:\n`install.packages('arrow', repos = 'https://apache.r-universe.dev')`.\n\n\n\nAttaching package: 'arrow'\n\n\nThe following object is masked from 'package:utils':\n\n    timestamp\n\n# TODO: dynamic target read - skip if fails?\n# dat &lt;- read_parquet(prqt)\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_test.html",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_test.html",
+    "title": "webR in Quarto HTML Documents",
+    "section": "",
+    "text": "Source\ninstall an R-Universe package\n\n=&gt; install its dependencies manually\ne.g. add crayon to yaml webr.packages\n\ncrayon a dependency of collateral\n\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n\n\nNote\n\n\n\nIf you install an R-Universe package, you currently have to install its dependencies manually. For example, I added crayon, a dependency of collateral, to my frontmatter under webr.packages.\n\n\n\n\n\n\n\n\nTip\n\n\n\nTry tapping on that textbox and changing the code to bad_mtcars |&gt; summary().\n\n\n\n\n\n\n\n\nYes, it can do plots too\n\n\n\n\n\nThis post’s example with {collateral} just has text output, but yes, quarto-webr can do plots too! Here’s a basic example with base R plotting, but you can install ggplot2 and any of your usual extensions through CRAN or R-Universe, of course!\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n1. Operate on groups2. Add messages\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\nheader 1\nThis is a webR-enabled code cell in a Quarto HTML document.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#row-1",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#row-1",
+    "title": "webR and dashboard",
+    "section": "row 1",
+    "text": "row 1\n\nCol 1\n\n\n\n\n\n\nNote\n\n\n\nIf R-Universe package, install deps manually. e.g. add crayon, a dependency of collateral, to yaml webr.packages\n\n\n\n\nCol 1\n\n\n\n\n\n\nTip\n\n\n\nTap on textbox code then change it.\n\n\n\n\nCol 1\n\n\n\n\n\n\nplots\n\n\n\n\n\n\nbasic example with base R plotting\ninstall ggplot2\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#sidebar",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#sidebar",
+    "title": "webR and dashboard",
+    "section": "Sidebar",
+    "text": "Sidebar\n\nRichard McElreath’s scientific framework\ncausal inference & model-based stats\nanalyze effect of smoking on birth weight\n\nmosaicData::babies dataset\ntidyverse and ggdag packages\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n# this chunk runs locally not in webpage\nrequire(tidyverse)\n## Loading required package: tidyverse\nR.version.string %&gt;% paste(3, .) %&gt;% print()\n## [1] \"3 R version 4.4.0 (2024-04-24)\"\nR.version.string %&gt;% paste(4, .) \n## [1] \"4 R version 4.4.0 (2024-04-24)\"\nprint(R.version.string) \n## [1] \"R version 4.4.0 (2024-04-24)\""
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#dag-a-directed-acyclic-graph",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#dag-a-directed-acyclic-graph",
+    "title": "webR and dashboard",
+    "section": "DAG: A directed acyclic graph",
+    "text": "DAG: A directed acyclic graph\n\nRow 1\n\nColumn 1\n\ndraw a causal diagram\n\nrelationship between smoking and birth weight\nany potential confounders\n\n\n\n\nColumn 2\n\ncausal assumptions\nstructure of data-generating process\nidentify\n\nconfounding variables\nsources of bias\npotential interventions\n\n\n\n\n\nRow 3\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#golem-a-statistical-model-or-estimator",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#golem-a-statistical-model-or-estimator",
+    "title": "webR and dashboard",
+    "section": "Golem: A statistical model or estimator",
+    "text": "Golem: A statistical model or estimator\n\napproximates the causal model and data\nspecified using formulas, priors, likelihoods, and algorithms\nvalidated by checking its fit, predictions, and diagnostics"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#owl-analyze-the-golem",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_dag_golem_owl.html#owl-analyze-the-golem",
+    "title": "webR and dashboard",
+    "section": "Owl: analyze the golem",
+    "text": "Owl: analyze the golem\n\nset of procedures and tools\nanswer the scientific questions\n\nposterior summaries, hypothesis tests, effect sizes, counterfactuals, and sensitivity analyses\nsimulating data from the statistical model\n\nto check its validity and robustness\n\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n\n\nNote\n\n\n\nIf R-Universe package, install dependencies manually. e.g. add crayon, a dependency of collateral, to yaml webr.packages\n\n\n\n\n\n\n\n\nTip\n\n\n\nTap on textbox code then change it.\n\n\n\n\n\n\n\n\nbase plot\n\n\n\n\n\n\nbasic example with base R plotting\ninstall ggplot2\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/webr_r_python/webr_duckdb.html",
+    "href": "inst/qmd/coatless_professor/webr_r_python/webr_duckdb.html",
+    "title": "webR in Quarto HTML Documents",
+    "section": "",
+    "text": "Please enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n\n\nNote\n\n\n\nIf R-Universe package, install dependencies manually. e.g. add crayon, a dependency of collateral, to yaml webr.packages\n\n\n\n\n\n\n\n\nTip\n\n\n\nTap on textbox code then change it.\n\n\n\n\n\n\n\n\nbase plot\n\n\n\n\n\n\nbasic example with base R plotting\ninstall ggplot2\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\nTop-level page\n\n1. parquet -&gt; duckdb2. CREATE VIEW3. fails: DuckDB extension httpfs\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ncan’t install (yet) DuckDB extension httpfs\nso this code fails with an error\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n\nTop-level page 2\n\n1. dbGetQuery2. dbGetQuery -&gt; INNER JOIN3. ggplot\n\n\n\ntest queries\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n\n\nNotes\n\nr.iresmi.net\n\njamesgoldie.dev\nwww.rostrum.blog\nhttps://webr.r-wasm.org/latest/\n\nRef\ninstall an R-Universe package\n\n=&gt; install its dependencies manually\ne.g. add crayon to yaml webr.packages\n\ncrayon a dependency of collateral"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/ems_r_py/webr-r_python.html",
+    "href": "inst/qmd/coatless_professor/ems_r_py/webr-r_python.html",
+    "title": "Pyodide in Quarto HTML Documents",
+    "section": "",
+    "text": "This is a pyodide-enabled code cell in a Quarto HTML document. + pyodide-python not pyodide.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  }
+]

@@ -1,4 +1,6 @@
 /.quarto/
 _R_LIB_USER
+# ignore all folders named 'old'
 */old/*
-webr/inst/extdata/data_raw/
+# + .gitignore in webr/inst/extdata/data_raw
+inst/extdata/data_raw/
