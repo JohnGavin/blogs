@@ -282,7 +282,7 @@ body.reveal.quarto-dark div.qwebr-console-area {
 // Document level settings ----
 
 // Determine if we need to install R packages
-globalThis.qwebrInstallRPackagesList = ['ggplot2,', ' ', 'readr,', ' ', 'arrow,', ' ', 'dplyr,', ' ', 'duckdb,', ' ', 'glue,', ' ', 'here,', ' ', 'igraph'];
+globalThis.qwebrInstallRPackagesList = ['readr,', ' ', 'arrow,', ' ', 'dplyr,', ' ', 'arrow,', ' ', 'duckdb,', ' ', 'glue,', ' ', 'here'];
 
 // Specify possible locations to search for the repository
 globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
@@ -304,7 +304,7 @@ globalThis.qwebrCustomizedWebROptions = {
 };
 
 // Store cell data
-globalThis.qwebrCellDetails = [{"code":"# https://quarto-webr.thecoatlessprofessor.com/qwebr-loading-data.html\n# virtual file sys home == working = /home/web_user\n# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#home-dir\ngetwd()\nlist.files(path = \".\", all.files = TRUE, full.names = TRUE, recursive = TRUE)\n\nurl <- \"https://coatless.github.io/raw-data/flights.csv\"\ndownload.file(url, \"flights.csv\")\nlist.files()\nflights_from_csv <- read.csv(\"flights.csv\")\ncat(\"Let's view the first 6 observations of data:\\n\")\nhead(flights_from_csv)","id":1,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-1","autorun":"true"}},{"code":"get_prqt_dat <- function(fn, fp){\n  fp %>% \n  here(fn) %>% \n  arrow::read_parquet() %>%\n  mutate_if(is.character, as.factor) \n}\nlist.files(fp)\nprqt_us <- fp_usa |> \n  sapply(arrow::read_parquet)\nnames(prqt_us) <- c(\"oil_crude\", \"oil_refined\")\nprqt_us |> lapply(glimpse) |> invisible()","id":2,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-2","autorun":"true"}},{"code":"# TODO: pin(url)\n(cnx <- dbConnect(duckdb()))","id":3,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"duckdb","autorun":"true"}},{"code":"destfile_str <- 'fp_usa'\nfp_usa |> \n  sapply(dir) \n\ndbSendQuery(cnx, glue(\"\n  CREATE VIEW oil_refined AS\n    SELECT * \n    FROM '{destfile_str}'\n    WHERE annais <> 'XXXX'\"))\nrm(destfile_str)","id":4,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"create view","autorun":"true"}},{"code":"# DESCRIBE\ndbGetQuery(cnx, \"\n  DESCRIBE prenoms\")\n# COUNT\ndbGetQuery(cnx,\"\n  SELECT COUNT(*)\n  FROM prenoms\")\n# MIN/MAX\ndbGetQuery(cnx,\"\n  SELECT MIN(annais), MAX(annais)\n  FROM prenoms\")","id":5,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-5","autorun":"true"}},{"code":"top_2022 <- dbGetQuery(cnx, \n  \"\n  WITH top AS (\n    SELECT preusuel\n    FROM prenoms\n    WHERE annais = '2022'\n      AND preusuel <> '_PRENOMS_RARES'\n    ORDER BY nombre DESC\n    LIMIT 9\n  )\n  SELECT \n    p.preusuel,\n    p.annais,\n    p.nombre\n  FROM prenoms p\n  INNER JOIN top ON p.preusuel = top.preusuel\n  \"\n)","id":6,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-6","autorun":"true"}},{"code":"#|   In our model of the data science process, you start with data import\n#| out-width/out-height physical space units\ntop_2022 |> \n  mutate(annais = as.integer(annais)) |> \n  filter(nombre > 100) |> \n  ggplot(aes(annais, nombre, color = preusuel)) +\n    geom_line(lwd = .8) +\n    scale_color_okabe_ito() +\n    labs(title = glue(\"2022 names\"),\n         subtitle = \"Most popular in France\",\n         x = \"year\",\n         y = bquote(N[birth]),\n         color = \"names\",\n         caption = glue(\"données INSEE (icem7) https://www.data.gouv.fr/fr/datasets/base-prenoms-insee-format-parquet/\n                        https://r.iresmi.net/ {Sys.time()}\")) +\n    theme_minimal() +\n    theme(plot.caption = element_text(size = 6),\n          plot.background = element_rect(fill = \"white\"))","id":7,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":"3","out-width":"500px","read-only":"true","editor-max-height":"","fig-alt":"|","out-height":"","results":"asis","A diagram displaying the data science cycle":"Import -> Tidy -> Understand","comment":"","context":"output","warning":"true","editor-font-scale":1,"fig-cap":"|","fig-width":"5","label":"unnamed-chunk-7","autorun":"true"}},{"code":"plot(sin, -pi, 2 * pi)","id":8,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"base plot","autorun":"true"}},{"code":"# NB: Create R objects while loading in here!\n# webr filter cosmetic warning re language engine ‘webr’ #| warning: FALSE # no get_engine(options$engine)  warning\n# hidden code chunk\n# installs WebR-ready version from R-universe\n# when the page loads => context setup\n\n# use yaml header to install at startup\n# webr::install(\"igraph\", repos = \"https://igraph.r-universe.dev\")\n# pacman::p_load(tidyverse, here)","id":9,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"setup # v interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"webr::install igraph","autorun":"true"}},{"code":"# context: setup\n# Install the binary from a custom repository\nwebr::install(\n  \"demorwasmbinary\", \n  repos = \"https://tutorials.thecoatlessprofessor.com/webr-unified-gh-workflow/\"\n)\nlibrary(\"demorwasmbinary\")","id":10,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-10","autorun":"true"}},{"code":"# Check to see if the function works\ndemorwasmbinary::in_webr()\n# View help documentation\n?demorwasmbinary::in_webr","id":11,"options":{"message":"true","editor-quick-suggestions":"false","dpi":72,"classes":"","output":"true","fig-height":5,"out-width":"100%","read-only":"true","editor-max-height":"","out-height":"","results":"asis","comment":"","context":"interactive","warning":"true","editor-font-scale":1,"fig-cap":"","fig-width":7,"label":"unnamed-chunk-11","autorun":"true"}}];
+globalThis.qwebrCellDetails = [{"code":"# TODO: read from website URL?\nlist.files(\"/\", all.files = T, full.names = T, \n  include.dirs = T, recursive = T,\n  pattern = \"parquet\")\n(fp <- here())\nlist.files(fp)\n(usa_out <- paste0(\n  \"oil_\", c(\"crude_usa\", \"oil_refined\"), \n  c(\".parquet\", \".csv\")[1]\n))","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-1","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":1},{"code":"fp_usa <- here(usa_out[1])\n# https://duckdb.org/docs/data/parquet/overview.html\nsql <- \"DESCRIBE SELECT * FROM '?fp_usa';\"\nlibrary(duckdb)\n(cnx <- dbConnect(duckdb()))\ndbGetQuery(cnx, sql)","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-2","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":2},{"code":"\nget_prqt_dat <- function(fn, fp){\n  fp %>% \n  here(fn) %>% \n  arrow::read_parquet() %>%\n  mutate_if(is.character, as.factor) \n}\nfp <- here() # \"data\"\nlist.files(fp)\nprqt_us <- fp_usa |> \n  sapply(arrow::read_parquet)\nnames(prqt_us) <- c(\"oil_crude\", \"oil_refined\")\nprqt_us |> lapply(glimpse) |> invisible()","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-3","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":3},{"code":"# TODO: pin(url)\n(cnx <- dbConnect(duckdb()))","options":{"fig-height":5,"comment":"","classes":"","label":"duckdb","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":4},{"code":"destfile_str <- 'fp_usa'\nfp_usa |> \n  sapply(dir) \n\ndbSendQuery(cnx, glue(\"\n  CREATE VIEW oil_refined AS\n    SELECT * \n    FROM '{destfile_str}'\n    WHERE annais <> 'XXXX'\"))\nrm(destfile_str)","options":{"fig-height":5,"comment":"","classes":"","label":"create view","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":5},{"code":"# DESCRIBE\ndbGetQuery(cnx, \"\n  DESCRIBE prenoms\")\n# COUNT\ndbGetQuery(cnx,\"\n  SELECT COUNT(*)\n  FROM prenoms\")\n# MIN/MAX\ndbGetQuery(cnx,\"\n  SELECT MIN(annais), MAX(annais)\n  FROM prenoms\")","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-6","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":6},{"code":"top_2022 <- dbGetQuery(cnx, \n  \"\n  WITH top AS (\n    SELECT preusuel\n    FROM prenoms\n    WHERE annais = '2022'\n      AND preusuel <> '_PRENOMS_RARES'\n    ORDER BY nombre DESC\n    LIMIT 9\n  )\n  SELECT \n    p.preusuel,\n    p.annais,\n    p.nombre\n  FROM prenoms p\n  INNER JOIN top ON p.preusuel = top.preusuel\n  \"\n)","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-7","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":7},{"code":"#|   In our model of the data science process, you start with data import\n#| out-width/out-height physical space units\ntop_2022 |> \n  mutate(annais = as.integer(annais)) |> \n  filter(nombre > 100) |> \n  ggplot(aes(annais, nombre, color = preusuel)) +\n    geom_line(lwd = .8) +\n    scale_color_okabe_ito() +\n    labs(title = glue(\"2022 names\"),\n         subtitle = \"Most popular in France\",\n         x = \"year\",\n         y = bquote(N[birth]),\n         color = \"names\",\n         caption = glue(\"données INSEE (icem7) https://www.data.gouv.fr/fr/datasets/base-prenoms-insee-format-parquet/\n                        https://r.iresmi.net/ {Sys.time()}\")) +\n    theme_minimal() +\n    theme(plot.caption = element_text(size = 6),\n          plot.background = element_rect(fill = \"white\"))","options":{"fig-height":"3","comment":"","fig-alt":"|","classes":"","A diagram displaying the data science cycle":"Import -> Tidy -> Understand","label":"unnamed-chunk-8","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":"5","warning":"true","out-width":"500px","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"|","context":"output"},"id":8},{"code":"plot(sin, -pi, 2 * pi)","options":{"fig-height":5,"comment":"","classes":"","label":"base plot","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":9},{"code":"# NB: Create R objects while loading in here!\n# webr filter cosmetic warning re language engine ‘webr’ #| warning: FALSE # no get_engine(options$engine)  warning\n# hidden code chunk\n# installs WebR-ready version from R-universe\n# when the page loads => context setup\n\n# use yaml header to install at startup\n# webr::install(\"igraph\", repos = \"https://igraph.r-universe.dev\")\n# pacman::p_load(tidyverse, here)","options":{"fig-height":5,"comment":"","classes":"","label":"webr::install igraph","dpi":72,"read-only":"true","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"setup # v interactive"},"id":10},{"code":"# context: setup\n# Install the binary from a custom repository\nwebr::install(\n  \"demorwasmbinary\", \n  repos = \"https://tutorials.thecoatlessprofessor.com/webr-unified-gh-workflow/\"\n)\nlibrary(\"demorwasmbinary\")","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-11","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":11},{"code":"# Check to see if the function works\ndemorwasmbinary::in_webr()\n# View help documentation\n?demorwasmbinary::in_webr","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-12","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":12},{"code":"# https://quarto-webr.thecoatlessprofessor.com/qwebr-loading-data.html\n# virtual file sys home == working = /home/web_user\n# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#home-dir\ngetwd()\nlist.files(path = \".\", all.files = TRUE, full.names = TRUE, recursive = TRUE)\n\n# https://quarto.org/docs/projects/code-execution.html#working-dir\n# file project\nSys.getenv('QUARTO_PROJECT_DIR')\n\nurl <- \"https://coatless.github.io/raw-data/flights.csv\"\ndownload.file(url, \"flights.csv\")\nlist.files()\nflights_from_csv <- read.csv(\"flights.csv\")\ncat(\"Let's view the first 6 observations of data:\\n\")\nhead(flights_from_csv)","options":{"fig-height":5,"comment":"","classes":"","label":"unnamed-chunk-13","dpi":72,"read-only":"false","editor-quick-suggestions":"false","results":"asis","out-height":"","output":"true","fig-width":7,"warning":"true","out-width":"100%","autorun":"true","editor-max-height":"","message":"true","editor-font-scale":1,"fig-cap":"","context":"interactive"},"id":13}];
 
 </script>
 <script type="module">
@@ -1408,20 +1408,199 @@ else {r} runs _locally only_
 
 https://quarto-webr.thecoatlessprofessor.com/examples/revealjs/#/embedded-slides
 --->
+<section id="read-usa-parquets" class="level2">
+<h2 class="anchored" data-anchor-id="read-usa-parquets">read usa parquets</h2>
+<section id="duckdb" class="level3">
+<h3 class="anchored" data-anchor-id="duckdb">duckdb</h3>
+</section>
+</section>
+<section id="where-to-write-usa-output" class="level2">
+<h2 class="anchored" data-anchor-id="where-to-write-usa-output">where to write usa output</h2>
+<div class="cell">
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div class="cell">
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<section id="arrow" class="level3">
+<h3 class="anchored" data-anchor-id="arrow">arrow</h3>
+<div class="cell">
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<!--
+
+::: {.cell}
+
+```{.r .cell-code}
+csv_us <- fns |> sapply(get_csv_dat, fp)
+```
+
+::: {.cell-output .cell-output-error}
+
+```
+Error in eval(expr, envir, enclos): object 'get_csv_dat' not found
+```
+
+
+:::
+
+```{.r .cell-code}
+names(csv_us) <- c("oil_crude", "oil_refined")
+```
+
+::: {.cell-output .cell-output-error}
+
+```
+Error: object 'csv_us' not found
+```
+
+
+:::
+
+```{.r .cell-code}
+csv_us |> str()
+```
+
+::: {.cell-output .cell-output-error}
+
+```
+Error in eval(expr, envir, enclos): object 'csv_us' not found
+```
+
+
+:::
+:::
+
+-->
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">1. parquet -&gt; duckdb</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">2. <code>CREATE VIEW</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<ul>
+<li>download local copy of french baby names</li>
+<li>create a duckdb view</li>
+</ul>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="top-level-page-2" class="level1">
+<h1>Top-level page 2</h1>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">1. dbGetQuery</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">2. dbGetQuery -&gt; <code>INNER JOIN</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">3. ggplot</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<ul>
+<li>test queries</li>
+</ul>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div id="qwebr-insertion-location-8"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+</div>
+</div>
+</section>
+<section id="notes" class="level1">
+<h1>Notes</h1>
+<ul>
+<li><a href="https://r.iresmi.net/posts/2024/webr/index.html">r.iresmi.net</a>
+<ul>
+<li><a href="https://jamesgoldie.dev/writing/your-new-r-package-webr/">jamesgoldie.dev</a></li>
+<li><a href="https://www.rostrum.blog/posts/2024-01-20-webr-remote/">www.rostrum.blog</a></li>
+<li>https://webr.r-wasm.org/latest/</li>
+</ul></li>
+<li><a href="https://github.com/coatless/quarto-webr">Ref</a></li>
+<li>install an R-Universe package
+<ul>
+<li>=&gt; install its dependencies manually</li>
+<li>e.g.&nbsp;add <a href="https://github.com/r-lib/crayon"><code>crayon</code></a> to yaml <a href="https://docs.r-wasm.org/webr/latest/packages.html"><code>webr.packages</code></a>
+<ul>
+<li><a href="https://github.com/r-lib/crayon"><code>crayon</code></a> a dependency of <a href="https://github.com/jimjam-slam/collateral"><code>collateral</code></a></li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+base plot
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>basic example with base R plotting</li>
+<li>install ggplot2</li>
+</ul>
+<div id="qwebr-insertion-location-9"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="qwebr-insertion-location-10"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div class="cell">
+<div id="qwebr-insertion-location-11"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<div class="cell">
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+</section>
+<section id="appendix---data-setup" class="level1">
+<h1>Appendix - data setup</h1>
+<!-- 
+https://quarto.org/docs/authoring/includes.html 
+https://stackoverflow.com/questions/75620644/how-to-include-r-snippet-code-from-external-file-into-quarto-document
+1/3)  #| eval: true 
+      #| file: create_dataframe.R
+2/3)  ```{r,file = "Chu1.R"}
+3/3)  #| echo: false
+      source("Chu1.R")
+-->
+<!---
+enclose ALL chunks with {webr-r} - not {r}
+then play each in webpage sequentially
+else {r} runs _locally only_
+
+https://quarto-webr.thecoatlessprofessor.com/examples/revealjs/#/embedded-slides
+--->
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(pkgs <span class="ot">&lt;-</span> params<span class="sc">$</span>pkgs) <span class="co"># params are NA in webr chunk</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "ggplot2" "readr"   "arrow"   "dplyr"   "duckdb"  "glue"    "here"   
-[8] "igraph" </code></pre>
+<pre><code>[1] "readr"  "arrow"  "dplyr"  "arrow"  "duckdb" "glue"   "here"  </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pkgs <span class="sc">|&gt;</span> <span class="fu">sapply</span>(library, <span class="at">char =</span> T) <span class="sc">|&gt;</span> <span class="fu">invisible</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-autorun="true" data-context="setup">
-<div id="qwebr-insertion-location-1"></div>
+<div id="qwebr-insertion-location-13"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1430,7 +1609,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <p>If R-Universe package, install dependencies manually. e.g.&nbsp;add <a href="https://github.com/r-lib/crayon"><code>crayon</code></a>, a dependency of <a href="https://github.com/jimjam-slam/collateral"><code>collateral</code></a>, to yaml <a href="https://docs.r-wasm.org/webr/latest/packages.html"><code>webr.packages</code></a></p>
 </div>
@@ -1449,6 +1628,7 @@ Tip
 <p>Tap on textbox code then change it, if <code>autorun: true</code>.</p>
 </div>
 </div>
+</section>
 <section id="top-level-page--" class="level1">
 <h1>Top-level page —-</h1>
 <ul>
@@ -1458,10 +1638,9 @@ Tip
 </ul></li>
 <li>Crude Oil Pack
 <ul>
-<li>trial data history from June 1, 2010 to present</li>
+<li>trial data history from June 1, 2010 to present ::: {.cell}</li>
 </ul></li>
 </ul>
-<div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"inst"</span>, <span class="st">"extdata"</span>, <span class="st">"data_raw"</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fns <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"crude-pack-historical-2024-01-31.csv.zip"</span>,</span>
@@ -1474,15 +1653,14 @@ Tip
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.character, as.factor) </span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mutate(across(where(is_character), as_factor))</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
+<p>::: ::: {.cell}</p>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># oil_refined slow cos of file size</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> fns <span class="sc">|&gt;</span> <span class="fu">sapply</span>(get_csv_dat, fp)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
- 27.208  32.060  15.187 </code></pre>
+ 25.967  30.360  16.030 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"oil_crude"</span>, <span class="st">"oil_refined"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">|&gt;</span> <span class="fu">str</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1504,7 +1682,7 @@ Tip
   ..$ direction            : Factor w/ 2 levels "export","import": 1 1 1 1 1 1 1 1 1 1 ...
   ..$ mass                 : num [1:24256308] 108292 29909 29186 52149 33884 ...</code></pre>
 </div>
-</div>
+<p>:::</p>
 </section>
 <section id="usa-only" class="level1">
 <h1>USA only</h1>
@@ -1515,8 +1693,8 @@ Tip
 </ul></li>
 <li>TODO: only writes locally so render write is <em>lost</em>?</li>
 </ul>
-<section id="where-to-write-usa-output" class="level2">
-<h2 class="anchored" data-anchor-id="where-to-write-usa-output">where to write usa output</h2>
+<section id="where-to-write-usa-output-1" class="level2">
+<h2 class="anchored" data-anchor-id="where-to-write-usa-output-1">where to write usa output</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"data"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(fp)) <span class="fu">dir.create</span>(fp)</span>
@@ -1573,154 +1751,9 @@ Tip
   .. [list output truncated]</code></pre>
 </div>
 </div>
+
+
 </section>
-<section id="read-usa-parquets" class="level2">
-<h2 class="anchored" data-anchor-id="read-usa-parquets">read usa parquets</h2>
-<div class="cell">
-<div id="qwebr-insertion-location-2"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<!--
-
-::: {.cell}
-
-```{.r .cell-code}
-csv_us <- fns |> sapply(get_csv_dat, fp)
-```
-
-::: {.cell-output .cell-output-error}
-
-```
-Error: '/Users/johngavin/docs_gh/blogs/webr/data/crude-pack-historical-2024-01-31.csv.zip' does not exist.
-```
-
-
-:::
-
-```{.r .cell-code}
-names(csv_us) <- c("oil_crude", "oil_refined")
-```
-
-::: {.cell-output .cell-output-error}
-
-```
-Error: object 'csv_us' not found
-```
-
-
-:::
-
-```{.r .cell-code}
-csv_us |> str()
-```
-
-::: {.cell-output .cell-output-error}
-
-```
-Error in eval(expr, envir, enclos): object 'csv_us' not found
-```
-
-
-:::
-:::
-
--->
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">1. parquet -&gt; duckdb</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">2. <code>CREATE VIEW</code></a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div id="qwebr-insertion-location-3"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<ul>
-<li>download local copy of french baby names</li>
-<li>create a duckdb view</li>
-</ul>
-<div id="qwebr-insertion-location-4"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="top-level-page-2" class="level1">
-<h1>Top-level page 2</h1>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">1. dbGetQuery</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">2. dbGetQuery -&gt; <code>INNER JOIN</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">3. ggplot</a></li></ul>
-<div class="tab-content">
-<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<ul>
-<li>test queries</li>
-</ul>
-<div id="qwebr-insertion-location-5"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div id="qwebr-insertion-location-6"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
-<div id="qwebr-insertion-location-7"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-</div>
-</div>
-</section>
-<section id="notes" class="level1">
-<h1>Notes</h1>
-<ul>
-<li><a href="https://r.iresmi.net/posts/2024/webr/index.html">r.iresmi.net</a>
-<ul>
-<li><a href="https://jamesgoldie.dev/writing/your-new-r-package-webr/">jamesgoldie.dev</a></li>
-<li><a href="https://www.rostrum.blog/posts/2024-01-20-webr-remote/">www.rostrum.blog</a></li>
-<li>https://webr.r-wasm.org/latest/</li>
-</ul></li>
-<li><a href="https://github.com/coatless/quarto-webr">Ref</a></li>
-<li>install an R-Universe package
-<ul>
-<li>=&gt; install its dependencies manually</li>
-<li>e.g.&nbsp;add <a href="https://github.com/r-lib/crayon"><code>crayon</code></a> to yaml <a href="https://docs.r-wasm.org/webr/latest/packages.html"><code>webr.packages</code></a>
-<ul>
-<li><a href="https://github.com/r-lib/crayon"><code>crayon</code></a> a dependency of <a href="https://github.com/jimjam-slam/collateral"><code>collateral</code></a></li>
-</ul></li>
-</ul></li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-base plot
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ul>
-<li>basic example with base R plotting</li>
-<li>install ggplot2</li>
-</ul>
-<div id="qwebr-insertion-location-8"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-</div>
-</div>
-<div class="cell">
-<div id="qwebr-insertion-location-9"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<div class="cell">
-<div id="qwebr-insertion-location-10"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-<div class="cell">
-<div id="qwebr-insertion-location-11"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
-
-
 </section>
 
 </main> <!-- /main -->

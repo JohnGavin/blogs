@@ -1,0 +1,172 @@
+---
+# install quarto-web from project's here() 
+#   quarto add coatless/quarto-web # -> Terminal
+#   quarto add --no-prompt coatless/quarto-webr
+#   quarto add --no-prompt coatless-quarto/pyodide
+# https://quarto-webr.thecoatlessprofessor.com/
+#   https://quarto-webr.thecoatlessprofessor.com/examples/readme/
+#   https://github.com/coatless/quarto-webr/tree/main
+#   https://quarto.org/docs/extensions/
+#webr
+# reads data from ./inst/extdata/data_raw
+# 
+# TODO: pass params into sql and capture output
+# 
+params:
+  pkgs:
+    # - "ggplot2"
+    - "readr"
+    - "arrow"
+    - "dplyr"
+    - "duckdb"
+    - "glue"
+    - "here"
+    # - "ggokabeito"
+    # - "igraph"    
+format: 
+  html:
+    resources:
+      - data/*.parquet
+execute:
+  echo: true
+  error: true
+  message: false
+  warning: false
+  fig-align: center
+  fig-width: 12
+  fig-height: 8
+  editor_options: 
+    chunk_output_type: inline
+    code-overflow: wrap
+    code-fold: true
+    code-tools: true
+engine: knitr
+title: duckdb, webR virt file sys
+output: 
+  html_document:
+    number_sections: true
+---
+
+<!---
+enclose ALL chunks with {webr-r} - not {r}
+then play each in webpage sequentially
+else {r} runs _locally only_
+
+https://quarto-webr.thecoatlessprofessor.com/examples/revealjs/#/embedded-slides
+--->
+
+
+```{r params_r, message=FALSE}
+(pkgs <- params$pkgs) # params are NA in webr chunk
+pkgs |> sapply(library, char = T) |> invisible()
+```
+```{webr virt file sys}
+#| autorun: true
+#| context: setup
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-loading-data.html
+# virtual file sys home == working = /home/web_user
+# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#home-dir
+getwd()
+list.files(path = ".", all.files = TRUE, full.names = TRUE, recursive = TRUE)
+
+# https://quarto.org/docs/projects/code-execution.html#working-dir
+# file project
+Sys.getenv('QUARTO_PROJECT_DIR')
+
+url <- "https://coatless.github.io/raw-data/flights.csv"
+download.file(url, "flights.csv")
+list.files()
+flights_from_csv <- read.csv("flights.csv")
+cat("Let's view the first 6 observations of data:\n")
+head(flights_from_csv)
+```
+
+
+:::{.callout-note collapse="false"}
+If R-Universe package, 
+install dependencies manually. 
+e.g. add 
+[`crayon`](https://github.com/r-lib/crayon), 
+a dependency of 
+[`collateral`](https://github.com/jimjam-slam/collateral), 
+to yaml 
+[`webr.packages`](https://docs.r-wasm.org/webr/latest/packages.html)
+:::
+:::{.callout-tip}
+Tap on textbox code then change it,
+if `autorun: true`.
+:::
+
+
+# Top-level page ----
+
++ Refined Oil Pack - Advanced
+  + trial data history from Jan 1, 2013 to present
++ Crude Oil Pack
+  + trial data history from June 1, 2010 to present
+```{r where to load local zips from}
+fp <- here("inst", "extdata", "data_raw")
+fns <- c(
+  "crude-pack-historical-2024-01-31.csv.zip",
+  "ref-prod-historical-2024-01-31.csv.zip"
+)
+get_csv_dat <- function(fn, fp, n_max = Inf){
+  fp %>% 
+  here(fn) %>% 
+  read_csv(show_col_types = FALSE, n_max = n_max) %>%
+  mutate_if(is.character, as.factor) 
+  # mutate(across(where(is_character), as_factor))
+}
+```
+```{r load local zips}
+system.time(
+  # oil_refined slow cos of file size
+  dat <- fns |> sapply(get_csv_dat, fp)
+)
+names(dat) <- c("oil_crude", "oil_refined")
+dat |> str()
+```
+
+# USA only 
++ filter USA-only into parquet/csv
+  + both import and exports data 
++ TODO: only writes locally so render write is _lost_?
+
+## where to write usa output
+```{r where to write usa output}
+fp <- here("data")
+if (!dir.exists(fp)) dir.create(fp)
+usa_out <- paste0(
+  "oil_", c("crude_usa", "oil_refined"), 
+  c(".parquet", ".csv")[1]
+)
+```
+
+## write usa parquets
+```{r write usa parquets}
+del_fn <- function(fn) 
+  if (dir.exists(fn)) unlink(fn, recursive = TRUE)
+```
+## delete old folder if exists, then write parquet
+```{r delete old then write parquet}
+# delete old folder if exists, then write parquet
+fp_usa <- here(fp, usa_out)
+del_fn(fp_usa[1])
+dat$oil_crude %>% 
+  filter(ISOcountry == "US") %>%
+  group_by(ISOcountry) |> 
+  arrow::write_parquet(sink = fp_usa[1])
+
+del_fn(fp_usa[2])
+dat$oil_refined %>% 
+  filter(country == "USA") %>%
+  group_by(direction) |> 
+  arrow::write_parquet(sink = fp_usa[2])
+```
+## what files were created
+```{r what files were created, message=FALSE}
+list.files(fp)
+fp_usa |> 
+  lapply(file.info) |> 
+  str(list.len = 2)
+```

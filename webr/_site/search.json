@@ -4,14 +4,14 @@
     "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html",
     "title": "duckdb, webR virt file sys",
     "section": "",
-    "text": "(pkgs &lt;- params$pkgs) # params are NA in webr chunk\n\n[1] \"ggplot2\" \"readr\"   \"arrow\"   \"dplyr\"   \"duckdb\"  \"glue\"    \"here\"   \n[8] \"igraph\" \n\npkgs |&gt; sapply(library, char = T) |&gt; invisible()\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+    "text": "Please enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n1. parquet -&gt; duckdb2. CREATE VIEW\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
   },
   {
     "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output",
     "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output",
     "title": "duckdb, webR virt file sys",
     "section": "where to write usa output",
-    "text": "where to write usa output\n\nfp &lt;- here(\"data\")\nif (!dir.exists(fp)) dir.create(fp)\nusa_out &lt;- paste0(\n  \"oil_\", c(\"crude_usa\", \"oil_refined\"), \n  c(\".parquet\", \".csv\")[1]\n)"
+    "text": "where to write usa output\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\narrow\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n1. parquet -&gt; duckdb2. CREATE VIEW\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
   },
   {
     "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#write-usa-parquets",
@@ -38,8 +38,8 @@
     "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#read-usa-parquets",
     "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#read-usa-parquets",
     "title": "duckdb, webR virt file sys",
-    "section": "read usa parquets",
-    "text": "read usa parquets\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n1. parquet -&gt; duckdb2. CREATE VIEW\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+    "section": "",
+    "text": "Please enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\n1. parquet -&gt; duckdb2. CREATE VIEW\n\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\n\n\ndownload local copy of french baby names\ncreate a duckdb view\n\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
   },
   {
     "objectID": "inst/qmd/old/usethis_targets.html",
@@ -117,5 +117,47 @@
     "title": "Pyodide in Quarto HTML Documents",
     "section": "",
     "text": "This is a pyodide-enabled code cell in a Quarto HTML document. + pyodide-python not pyodide.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page.\n\nPlease enable JavaScript to experience the dynamic code cell content on this page."
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html",
+    "title": "duckdb, webR virt file sys",
+    "section": "",
+    "text": "(pkgs &lt;- params$pkgs) # params are NA in webr chunk\n\n[1] \"readr\"  \"arrow\"  \"dplyr\"  \"duckdb\" \"glue\"   \"here\"  \n\npkgs |&gt; sapply(library, char = T) |&gt; invisible()\n# https://quarto-webr.thecoatlessprofessor.com/qwebr-loading-data.html\n# virtual file sys home == working = /home/web_user\n# https://quarto-webr.thecoatlessprofessor.com/qwebr-meta-options.html#home-dir\ngetwd()\nlist.files(path = \".\", all.files = TRUE, full.names = TRUE, recursive = TRUE)\n\n# https://quarto.org/docs/projects/code-execution.html#working-dir\n# file project\nSys.getenv('QUARTO_PROJECT_DIR')\n\nurl &lt;- \"https://coatless.github.io/raw-data/flights.csv\"\ndownload.file(url, \"flights.csv\")\nlist.files()\nflights_from_csv &lt;- read.csv(\"flights.csv\")\ncat(\"Let's view the first 6 observations of data:\\n\")\nhead(flights_from_csv)"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#where-to-write-usa-output",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#where-to-write-usa-output",
+    "title": "duckdb, webR virt file sys",
+    "section": "where to write usa output",
+    "text": "where to write usa output\n\nfp &lt;- here(\"data\")\nif (!dir.exists(fp)) dir.create(fp)\nusa_out &lt;- paste0(\n  \"oil_\", c(\"crude_usa\", \"oil_refined\"), \n  c(\".parquet\", \".csv\")[1]\n)"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#write-usa-parquets",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#write-usa-parquets",
+    "title": "duckdb, webR virt file sys",
+    "section": "write usa parquets",
+    "text": "write usa parquets\n\ndel_fn &lt;- function(fn) \n  if (dir.exists(fn)) unlink(fn, recursive = TRUE)"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#delete-old-folder-if-exists-then-write-parquet",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#delete-old-folder-if-exists-then-write-parquet",
+    "title": "duckdb, webR virt file sys",
+    "section": "delete old folder if exists, then write parquet",
+    "text": "delete old folder if exists, then write parquet\n\n# delete old folder if exists, then write parquet\nfp_usa &lt;- here(fp, usa_out)\ndel_fn(fp_usa[1])\ndat$oil_crude %&gt;% \n  filter(ISOcountry == \"US\") %&gt;%\n  group_by(ISOcountry) |&gt; \n  arrow::write_parquet(sink = fp_usa[1])\n\ndel_fn(fp_usa[2])\ndat$oil_refined %&gt;% \n  filter(country == \"USA\") %&gt;%\n  group_by(direction) |&gt; \n  arrow::write_parquet(sink = fp_usa[2])"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#what-files-were-created",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb_01_r.html#what-files-were-created",
+    "title": "duckdb, webR virt file sys",
+    "section": "what files were created",
+    "text": "what files were created\n\nlist.files(fp)\n\n[1] \"oil_crude_usa.parquet\"   \"oil_oil_refined.parquet\"\n\nfp_usa |&gt; \n  lapply(file.info) |&gt; \n  str(list.len = 2)\n\nList of 2\n $ :'data.frame':   1 obs. of  10 variables:\n  ..$ size  : num 749377\n  ..$ isdir : logi FALSE\n  .. [list output truncated]\n $ :'data.frame':   1 obs. of  10 variables:\n  ..$ size  : num 2205163\n  ..$ isdir : logi FALSE\n  .. [list output truncated]"
+  },
+  {
+    "objectID": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output-1",
+    "href": "inst/qmd/coatless_professor/duckdb_webr/webR_duckdb.html#where-to-write-usa-output-1",
+    "title": "duckdb, webR virt file sys",
+    "section": "where to write usa output",
+    "text": "where to write usa output\n\nfp &lt;- here(\"data\")\nif (!dir.exists(fp)) dir.create(fp)\nusa_out &lt;- paste0(\n  \"oil_\", c(\"crude_usa\", \"oil_refined\"), \n  c(\".parquet\", \".csv\")[1]\n)"
   }
 ]
