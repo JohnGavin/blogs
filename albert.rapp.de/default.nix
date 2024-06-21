@@ -18,8 +18,7 @@
 let
  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/3f316d2a50699a78afe5e77ca486ad553169061e.tar.gz") {};
  rpkgs = builtins.attrValues {
-  inherit (pkgs.rPackages) devtools dplyr fs  ggplot2 glue goodpractice here  lubridate pacman purrr quarto readr reticulate rmarkdown rvest stringr tarchetypes targets tidyr ggiraph visNetwork ;
-  # httpgd
+  inherit (pkgs.rPackages) askpass base64enc brew brio bslib cachem callr cli clipr commonmark cpp11 crayon credentials curl desc devtools diffobj digest downlit dplyr ellipsis evaluate fansi fastmap fontawesome fs gert ggiraph ggplot2 gh giscoR gitcreds glue goodpractice here highr htmltools htmlwidgets httpuv httr httr2 ini jquerylib jsonlite knitr later lifecycle magrittr memoise mime miniUI openssl pacman pillar pkgbuild pkgconfig pkgdown pkgload praise prettyunits processx profvis promises ps purrr quarto R6 ragg rappdirs rcmdcheck Rcpp readr rematch2 remotes reticulate rlang rmarkdown roxygen2 rprojroot rstudioapi rversions rvest sass sessioninfo sf shiny sourcetools stringi stringr sys systemfonts tarchetypes targets testthat textshaping tibble tidyr tinytex urlchecker usethis utf8 vctrs visNetwork waldo whisker withr xfun xml2 xopen xtable yaml zip;
 };
  git_archive_pkgs = [(pkgs.rPackages.buildRPackage {
     name = "rix";
@@ -48,8 +47,8 @@ let
 
     buildInputs = [ git_archive_pkgs rpkgs  system_packages  ];
       shellHook = "
-  # export R_LIBS_USER='$(pwd)/_libs' &&
-  export R_LIBS_USER= library  &&
+  # export R_LIBS_USER='$(pwd)/_libs' && 
+  export R_LIBS_USER= library  && 
     # Augment the dynamic linker path
     export LIBCLANG_PATH=${pkgs.libclang.lib}/ library  ;
    ";

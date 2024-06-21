@@ -24,13 +24,21 @@ format: html
 ---
 
 ```{r p_load}
-# pak::pak('giscoR')
+# ./Rprofile (for rix) 
+#   => Terminal & rstudio BACKGROUND job read ./library
+#   => not just rix but all pkgs need to be in ./library!
+# pak::pak(c('giscoR', 'knitr', 'rmarkdown', 'usethis', 'ggiraph', 'dplyr', 'stringr', 'janitor', 'here', 'quarto', 'purrr'))
+# system('quarto preview inst/qmd/giscoR_maps.qmd --to html --no-watch-inputs --no-browse')
+
+# pak::pak(c('giscoR', 'knitr', 'rmarkdown', 'usethis'))
 pkgs_new <- c(
   # giscoR needs sf - sf fails for libproj & sqlite3
   "giscoR", "sf", "ggiraph",
   "dplyr", "glue", "stringr", # "tidyverse", 
    # ::
-  "janitor", 'here', "quarto", "htmltools", "rmarkdown"
+  "janitor", 'here', "quarto", "htmltools", "rmarkdown",
+  "ggplot2", 'purrr',
+  'knitr', 'rmarkdown', 'usethis'
 )
 pkgs_new |> sapply(library, char = T) |> invisible()
 # pacman::p_load(pkgs_new)
@@ -61,8 +69,6 @@ germany_districts <-
   as_tibble() |> 
   janitor::clean_names()
 ```
-
-
 ```{r ggplot}
 #| echo: false
 germany_districts |> glimpse()
@@ -213,8 +219,8 @@ gg_plt <- germany_districts_w_state |>
 girafe(ggobj = gg_plt)
 ```
 
-## nice text labels
-```{r}
+## CSS text labels
+```{r CSS text labels}
 make_nice_label <- function(nuts_name, state) {
   # wrap texts in HTML <span> tags 
   nuts_name_label <- htmltools::span(
@@ -319,6 +325,7 @@ girafe(
 
 # Appendix
 ## params
+Params: `r params$country`
 ```{r params}
 params
 glue("{{< meta title >}}") # FAILS
@@ -326,4 +333,3 @@ glue("{{< meta title >}}") # FAILS
 #   OR !expr in yaml to parse/eval string see params$country
 eval(parse(text = params$p_list))
 ```
-Params: `r params$country`
