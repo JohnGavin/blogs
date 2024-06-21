@@ -1,0 +1,46 @@
+---
+params:
+  source_url: "https://thierrymoudiki.github.io//blog/2024/05/19/python/r/deep-qrns"
+title: "Deep Quasi-Randomized 'neural' networks"
+format: html
+---
+
+# Error: Python module nnetsauce was not found.
+
+
+```{r, eval = FALSE}
+install.packages("nnetsauce", repos = c("https://techtonique.r-universe.dev", "https://cran.r-project.org"))
+```
+```{r}
+library("nnetsauce")
+# ?nnetsauce::MultitaskClassifier
+```
+```{r}
+library(datasets)
+
+set.seed(123)
+X <- as.matrix(iris[, 1:4])
+y <- as.integer(iris$Species) - 1L
+
+# split data into training and test sets
+(index_train <- base::sample.int(
+  n = nrow(X),
+  size = floor(0.8*nrow(X)),
+  replace = FALSE))
+X_train <- X[index_train, ]
+y_train <- y[index_train]
+X_test <- X[-index_train, ]
+y_test <- y[-index_train]
+
+# base model is a Logistic Regression
+obj2 <- sklearn$linear_model$LogisticRegressionCV()
+# there are 3 layers in the deep model
+obj <- DeepClassifier(obj2, n_layers = 3L)
+# adjust the model 
+res <- obj$fit(X_train, y_train)
+
+# accuracy, must be 1
+print(mean(obj$predict(X_test)==y_test))
+
+```
+
